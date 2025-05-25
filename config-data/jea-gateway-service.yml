@@ -1,0 +1,27 @@
+server:
+  port: 8085
+eureka:
+  client:
+    serviceUrl:
+      #defaultZone: http://localhost:8090/eureka
+      defaultZone: ${EUREKA_URI:http://localhost:8090/eureka}
+  instance:
+    #hostname: localhost
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+spring:
+  cloud:
+    gateway:
+
+      discovery:
+        locator:
+          enable: true
+      routes:
+        - id: jea-catalogo-service
+          uri: lb://jea-catalogo-service
+          predicates:
+            - Path=/categoria/**, /producto/**
+
+        - id: jea-cliente-service
+          uri: lb://jea-cliente-service
+          predicates:
+            - Path=/cliente/**
