@@ -25,3 +25,8 @@ spring:
           uri: lb://jea-cliente-service
           predicates:
             - Path=/cliente/**
+
+        - id: jea-venta-service
+          uri: lb://jea-venta-service
+          predicates:
+            - Path=/venta/**

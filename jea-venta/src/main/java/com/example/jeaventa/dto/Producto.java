@@ -1,0 +1,61 @@
+package com.example.jeaventa.dto;
+
+public class Producto {
+
+    private Long id;
+    private String codigo;
+    private String nombre;
+    private Integer cantidad;
+    private Double precioVenta;
+
+    public Producto() {
+    }
+
+    public Producto(Long id, String codigo, String nombre, Integer cantidad, Double precioVenta) {
+        this.id = id;
+        this.codigo = codigo;
+        this.nombre = nombre;
+        this.cantidad = cantidad;
+        this.precioVenta = precioVenta;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public Integer getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(Integer cantidad) {
+        this.cantidad = cantidad;
+    }
+
+    public Double getPrecioVenta() {
+        return precioVenta;
+    }
+
+    public void setPrecioVenta(Double precioVenta) {
+        this.precioVenta = precioVenta;
+    }
+}
