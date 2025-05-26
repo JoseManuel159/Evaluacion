@@ -30,3 +30,8 @@ spring:
           uri: lb://jea-venta-service
           predicates:
             - Path=/venta/**
+
+        - id: jea-pedido-service
+          uri: lb://jea-pedido-service
+          predicates:
+            - Path=/pedido/**
