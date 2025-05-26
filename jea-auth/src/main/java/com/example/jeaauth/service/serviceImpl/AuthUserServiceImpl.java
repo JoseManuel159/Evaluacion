@@ -28,13 +28,9 @@ public class AuthUserServiceImpl implements AuthUserService {
         if (user.isPresent())
             return null;
         String password = passwordEncoder.encode(authUserDto.getPassword());
-        AuthUser authUser = AuthUser.builder()
-                .userName(authUserDto.getUserName())
-                .password(password)
-                .build();
-
-
-
+        AuthUser authUser = new AuthUser();
+        authUser.setUserName(authUserDto.getUserName());
+        authUser.setPassword(password);
 
         return authUserRepository.save(authUser);
     }
