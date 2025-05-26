@@ -16,6 +16,11 @@ spring:
         locator:
           enable: true
       routes:
+        - id: jea-auth-service
+          uri: lb://jea-auth-service
+          predicates:
+            - Path=/auth/**
+
         - id: jea-catalogo-service
           uri: lb://jea-catalogo-service
           predicates:
