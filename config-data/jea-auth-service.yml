@@ -4,7 +4,7 @@ server:
 
 spring:
   application:
-    name: ms-auth-service
+    name: jea-auth-service
   jpa:
     hibernate.ddl-auto: update
     generate-ddl: true
