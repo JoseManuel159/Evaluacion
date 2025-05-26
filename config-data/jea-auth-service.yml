@@ -21,5 +21,6 @@ eureka:
       defaultZone: ${EUREKA_URI:http://localhost:8090/eureka}
   instance:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    prefer-ip-address: true
 jwt:
   secret: secret
