@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "jea-catalogo-service", path = "/categoria")
+@FeignClient(name = "jea-catalogo-service", contextId = "categoriaFeign", path = "/categoria")
 public interface CategoriaFeign {
 
     @GetMapping("/{id}")
