@@ -40,6 +40,11 @@ spring:
           predicates:
             - Path=/cliente/**
 
+        - id: jea-pagos-service
+          uri: lb://jea-pagos-service
+          predicates:
+            - Path=/pagos/**
+
         - id: jea-venta-service
           uri: lb://jea-venta-service
           predicates:
