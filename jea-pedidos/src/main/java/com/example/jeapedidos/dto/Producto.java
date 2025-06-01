@@ -8,20 +8,18 @@ public class Producto {
     private String nombre;
     private Integer cantidad;
     private Double precioVenta;
-    private Long categoriaId;
     private Categoria categoria;
 
 
     public Producto() {
     }
 
-    public Producto(Long id, String codigo, String nombre, Integer cantidad, Double precioVenta, Long categoriaId, Categoria categoria) {
+    public Producto(Long id, String codigo, String nombre, Integer cantidad, Double precioVenta, Categoria categoria) {
         this.id = id;
         this.codigo = codigo;
         this.nombre = nombre;
         this.cantidad = cantidad;
         this.precioVenta = precioVenta;
-        this.categoriaId = categoriaId;
         this.categoria = categoria;
     }
 
@@ -63,14 +61,6 @@ public class Producto {
 
     public void setPrecioVenta(Double precioVenta) {
         this.precioVenta = precioVenta;
-    }
-
-    public Long getCategoriaId() {
-        return categoriaId;
-    }
-
-    public void setCategoriaId(Long categoriaId) {
-        this.categoriaId = categoriaId;
     }
 
     public Categoria getCategoria() {

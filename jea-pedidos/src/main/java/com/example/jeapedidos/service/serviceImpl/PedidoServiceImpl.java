@@ -2,11 +2,13 @@ package com.example.jeapedidos.service.serviceImpl;
 
 import com.example.jeapedidos.dto.Categoria;
 import com.example.jeapedidos.dto.Cliente;
+import com.example.jeapedidos.dto.FormaPago;
 import com.example.jeapedidos.dto.Producto;
 import com.example.jeapedidos.entity.Pedido;
 import com.example.jeapedidos.entity.PedidoDetalle;
 import com.example.jeapedidos.feing.CategoriaFeign;
 import com.example.jeapedidos.feing.ClienteFeign;
+import com.example.jeapedidos.feing.FormaPagoFeign;
 import com.example.jeapedidos.feing.ProductoFeign;
 import com.example.jeapedidos.repository.PedidoRepository;
 import com.example.jeapedidos.service.PedidoService;
@@ -33,6 +35,10 @@ public class PedidoServiceImpl implements PedidoService {
     @Autowired
     private CategoriaFeign categoriaFeign;
 
+    @Autowired
+    private FormaPagoFeign formaPagoFeign;
+
+
     @Override
     public Pedido createPedido(Pedido pedido) {
         // Asegurar fechaEntrega 1 semana después de fechaPedido
@@ -58,15 +64,12 @@ public class PedidoServiceImpl implements PedidoService {
 
         List<PedidoDetalle> detalles = pedido.getDetalle().stream().map(detalle -> {
             Producto producto = productoFeign.listarProducto(detalle.getProductoId()).getBody();
-
-            if (producto.getCategoriaId() != null) {
-                Categoria categoria = categoriaFeign.obtenerCategoria(producto.getCategoriaId()).getBody();
-                producto.setCategoria(categoria);
-            }
-
             detalle.setProducto(producto);
             return detalle;
         }).collect(Collectors.toList());
+
+        FormaPago formaPago = formaPagoFeign.obtenerFormaPago(pedido.getFormapagoId()).getBody();
+        pedido.setFormaPago(formaPago);
 
         pedido.setDetalle(detalles);
         return Optional.of(pedido);

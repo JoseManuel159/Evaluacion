@@ -1,10 +1,12 @@
 package com.example.jeaventa.service.serviceImpl;
 
 import com.example.jeaventa.dto.Cliente;
+import com.example.jeaventa.dto.FormaPago;
 import com.example.jeaventa.dto.Producto;
 import com.example.jeaventa.entity.Venta;
 import com.example.jeaventa.entity.VentaDetalle;
 import com.example.jeaventa.feign.ClienteFeign;
+import com.example.jeaventa.feign.FormaPagoFeign;
 import com.example.jeaventa.feign.ProductoFeign;
 import com.example.jeaventa.repository.VentaRepository;
 import com.example.jeaventa.service.VentaService;
@@ -26,6 +28,9 @@ public class VentaServiceImpl implements VentaService {
 
     @Autowired
     private ProductoFeign productoFeign;
+
+    @Autowired
+    private FormaPagoFeign formaPagoFeign;
 
     @Override
     public Venta createVenta(Venta venta) {
@@ -51,6 +56,9 @@ public class VentaServiceImpl implements VentaService {
             detalle.setProducto(producto);
             return detalle;
         }).collect(Collectors.toList());
+
+        FormaPago formaPago = formaPagoFeign.obtenerFormaPago(venta.getFormapagoId()).getBody();
+        venta.setFormaPago(formaPago);
 
         venta.setDetalle(detalles);
         return Optional.of(venta);

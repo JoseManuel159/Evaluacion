@@ -28,7 +28,7 @@ spring:
         - id: jea-auth-service
           uri: lb://jea-auth-service
           predicates:
-            - Path=/auth/**
+            - Path=/auth/**, /usuario/**
 
         - id: jea-catalogo-service
           uri: lb://jea-catalogo-service

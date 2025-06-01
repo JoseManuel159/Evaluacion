@@ -1,6 +1,7 @@
 package com.example.jeaventa.entity;
 
 import com.example.jeaventa.dto.Cliente;
+import com.example.jeaventa.dto.FormaPago;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
@@ -30,11 +31,24 @@ public class Venta {
 
     private LocalDateTime fechaVenta;
 
+    private Double baseImponible;
+    private Double igv;
+    private Double total;
+
+    @Column(name = "formapago_id")
+    private Long formapagoId;
+
+    @Transient
+    private FormaPago formaPago;
+
+    private String estado;
+
+
     public Venta() {
         this.fechaVenta = LocalDateTime.now();
     }
 
-    public Venta(Integer id, String serie, String numero, String descripcion, Long clienteId, Cliente cliente, List<VentaDetalle> detalle, LocalDateTime fechaVenta) {
+    public Venta(Integer id, String serie, String numero, String descripcion, Long clienteId, Cliente cliente, List<VentaDetalle> detalle, LocalDateTime fechaVenta, Double baseImponible, Double igv, Double total, FormaPago formaPago, String estado, Long formapagoId) {
         this.id = id;
         this.serie = serie;
         this.numero = numero;
@@ -43,6 +57,12 @@ public class Venta {
         this.cliente = cliente;
         this.detalle = detalle;
         this.fechaVenta = fechaVenta;
+        this.baseImponible = baseImponible;
+        this.igv = igv;
+        this.total = total;
+        this.formaPago = formaPago;
+        this.estado = estado;
+        this.formapagoId = formapagoId;
     }
 
     public Integer getId() {
@@ -107,5 +127,53 @@ public class Venta {
 
     public void setFechaVenta(LocalDateTime fechaVenta) {
         this.fechaVenta = fechaVenta;
+    }
+
+    public Double getBaseImponible() {
+        return baseImponible;
+    }
+
+    public void setBaseImponible(Double baseImponible) {
+        this.baseImponible = baseImponible;
+    }
+
+    public Double getIgv() {
+        return igv;
+    }
+
+    public void setIgv(Double igv) {
+        this.igv = igv;
+    }
+
+    public Double getTotal() {
+        return total;
+    }
+
+    public void setTotal(Double total) {
+        this.total = total;
+    }
+
+    public FormaPago getFormaPago() {
+        return formaPago;
+    }
+
+    public void setFormaPago(FormaPago formaPago) {
+        this.formaPago = formaPago;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public Long getFormapagoId() {
+        return formapagoId;
+    }
+
+    public void setFormapagoId(Long formapagoId) {
+        this.formapagoId = formapagoId;
     }
 }

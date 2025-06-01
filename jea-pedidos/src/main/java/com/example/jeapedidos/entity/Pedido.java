@@ -1,6 +1,7 @@
 package com.example.jeapedidos.entity;
 
 import com.example.jeapedidos.dto.Cliente;
+import com.example.jeapedidos.dto.FormaPago;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
@@ -33,13 +34,25 @@ public class Pedido {
     private LocalDateTime fechaPedido;
     private LocalDate fechaEntrega;
 
+    private Double baseImponible;
+    private Double igv;
+    private Double total;
+
+    @Column(name = "formapago_id")
+    private Long formapagoId;
+
+    @Transient
+    private FormaPago formaPago;
+
+
+
     public Pedido() {
         this.fechaPedido = LocalDateTime.now();
         this.fechaEntrega = this.fechaPedido.toLocalDate().plusWeeks(1); // Entrega 1 semana después
         this.estado = "PENDIENTE";
     }
 
-    public Pedido(Integer id, String codigo, String descripcion, String estado, Long clienteId, Cliente cliente, List<PedidoDetalle> detalle, LocalDateTime fechaPedido, LocalDate fechaEntrega) {
+    public Pedido(Integer id, String codigo, String descripcion, String estado, Long clienteId, Cliente cliente, List<PedidoDetalle> detalle, LocalDateTime fechaPedido, LocalDate fechaEntrega, Double baseImponible, Double igv, Double total, Long formapagoId, FormaPago formaPago) {
         this.id = id;
         this.codigo = codigo;
         this.descripcion = descripcion;
@@ -49,6 +62,11 @@ public class Pedido {
         this.detalle = detalle;
         this.fechaPedido = fechaPedido;
         this.fechaEntrega = fechaEntrega;
+        this.baseImponible = baseImponible;
+        this.igv = igv;
+        this.total = total;
+        this.formapagoId = formapagoId;
+        this.formaPago = formaPago;
     }
 
     public Integer getId() {
@@ -121,5 +139,45 @@ public class Pedido {
 
     public void setFechaEntrega(LocalDate fechaEntrega) {
         this.fechaEntrega = fechaEntrega;
+    }
+
+    public Double getBaseImponible() {
+        return baseImponible;
+    }
+
+    public void setBaseImponible(Double baseImponible) {
+        this.baseImponible = baseImponible;
+    }
+
+    public Double getIgv() {
+        return igv;
+    }
+
+    public void setIgv(Double igv) {
+        this.igv = igv;
+    }
+
+    public Double getTotal() {
+        return total;
+    }
+
+    public void setTotal(Double total) {
+        this.total = total;
+    }
+
+    public Long getFormapagoId() {
+        return formapagoId;
+    }
+
+    public void setFormapagoId(Long formapagoId) {
+        this.formapagoId = formapagoId;
+    }
+
+    public FormaPago getFormaPago() {
+        return formaPago;
+    }
+
+    public void setFormaPago(FormaPago formaPago) {
+        this.formaPago = formaPago;
     }
 }
