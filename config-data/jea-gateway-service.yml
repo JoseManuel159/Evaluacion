@@ -54,3 +54,8 @@ spring:
           uri: lb://jea-pedido-service
           predicates:
             - Path=/pedido/**
+
+        - id: jea-compra-service
+          uri: lb://jea-compra-service
+          predicates:
+            - Path=/compra/**
