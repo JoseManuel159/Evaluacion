@@ -11,7 +11,10 @@ import com.example.jeaventa.feign.ProductoFeign;
 import com.example.jeaventa.repository.VentaRepository;
 import com.example.jeaventa.service.VentaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +37,36 @@ public class VentaServiceImpl implements VentaService {
 
     @Override
     public Venta createVenta(Venta venta) {
-        return ventaRepository.save(venta);
+        Venta nuevaVenta = ventaRepository.save(venta);
+
+        for (VentaDetalle detalle : nuevaVenta.getDetalle()) {
+            Long productoId = detalle.getProductoId();
+            Double cantidadVendida = detalle.getCantidad();
+
+            ResponseEntity<Producto> response = productoFeign.listarProducto(productoId);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Producto producto = response.getBody();
+
+                // ✅ Verificar que el producto esté activo
+                if (!producto.isEstado()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Producto con ID " + productoId + " no está activo.");
+                }
+
+                // ✅ Verificar que haya stock suficiente
+                if (producto.getCantidad() < cantidadVendida.intValue()) {
+                    throw new RuntimeException("Stock insuficiente para el producto con ID " + productoId + ".");
+                }
+
+                // ✅ Restar la cantidad vendida del inventario
+                int nuevaCantidad = producto.getCantidad() - cantidadVendida.intValue();
+                productoFeign.actualizarCantidad(productoId, nuevaCantidad);
+            } else {
+                throw new RuntimeException("Producto con ID " + productoId + " no encontrado al registrar venta.");
+            }
+        }
+
+        return nuevaVenta;
     }
 
     @Override

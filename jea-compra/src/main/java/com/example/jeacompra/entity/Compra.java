@@ -13,8 +13,12 @@ public class Compra {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String serie;
+
+    @Column(nullable = false, unique = true)
     private String numero;
+
     private String descripcion;
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

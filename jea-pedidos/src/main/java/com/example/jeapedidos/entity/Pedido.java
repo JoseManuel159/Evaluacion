@@ -16,7 +16,12 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(nullable = false, unique = true)
     private String codigo;
+
+    @Column(nullable = false, unique = true)
+    private String serie;
+
     private String descripcion;
     private String estado;
 
@@ -52,9 +57,10 @@ public class Pedido {
         this.estado = "PENDIENTE";
     }
 
-    public Pedido(Integer id, String codigo, String descripcion, String estado, Long clienteId, Cliente cliente, List<PedidoDetalle> detalle, LocalDateTime fechaPedido, LocalDate fechaEntrega, Double baseImponible, Double igv, Double total, Long formapagoId, FormaPago formaPago) {
+    public Pedido(Integer id, String codigo, String serie,String descripcion, String estado, Long clienteId, Cliente cliente, List<PedidoDetalle> detalle, LocalDateTime fechaPedido, LocalDate fechaEntrega, Double baseImponible, Double igv, Double total, Long formapagoId, FormaPago formaPago) {
         this.id = id;
         this.codigo = codigo;
+        this.serie = serie;
         this.descripcion = descripcion;
         this.estado = estado;
         this.clienteId = clienteId;
@@ -179,5 +185,13 @@ public class Pedido {
 
     public void setFormaPago(FormaPago formaPago) {
         this.formaPago = formaPago;
+    }
+
+    public String getSerie() {
+        return serie;
+    }
+
+    public void setSerie(String serie) {
+        this.serie = serie;
     }
 }

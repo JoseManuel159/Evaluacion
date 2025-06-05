@@ -75,4 +75,13 @@ public class ProductoServiceImpl implements ProductoService {
             throw new RuntimeException("Producto no encontrado");
         }
     }
+
+    @Override
+    public Producto actualizarCantidad(Long id, Integer nuevaCantidad) {
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
+        producto.setCantidad(nuevaCantidad);
+        return productoRepository.save(producto);
+    }
+
 }

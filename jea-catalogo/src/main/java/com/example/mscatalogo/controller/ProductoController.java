@@ -59,4 +59,11 @@ public class ProductoController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PutMapping("/{id}/cantidad")
+    public ResponseEntity<Producto> actualizarCantidad(@PathVariable Long id, @RequestBody Integer nuevaCantidad) {
+        Producto productoActualizado = productoService.actualizarCantidad(id, nuevaCantidad);
+        return ResponseEntity.ok(productoActualizado);
+    }
+
 }

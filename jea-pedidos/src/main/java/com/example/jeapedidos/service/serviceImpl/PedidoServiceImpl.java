@@ -1,6 +1,5 @@
 package com.example.jeapedidos.service.serviceImpl;
 
-import com.example.jeapedidos.dto.Categoria;
 import com.example.jeapedidos.dto.Cliente;
 import com.example.jeapedidos.dto.FormaPago;
 import com.example.jeapedidos.dto.Producto;
@@ -13,6 +12,7 @@ import com.example.jeapedidos.feing.ProductoFeign;
 import com.example.jeapedidos.repository.PedidoRepository;
 import com.example.jeapedidos.service.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -41,13 +41,44 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Override
     public Pedido createPedido(Pedido pedido) {
-        // Asegurar fechaEntrega 1 semana después de fechaPedido
+        // Asegurar fechaPedido y fechaEntrega
         if (pedido.getFechaPedido() == null) {
             pedido.setFechaPedido(LocalDateTime.now());
         }
         pedido.setFechaEntrega(pedido.getFechaPedido().toLocalDate().plusWeeks(1));
+
+        // Validar cada producto del pedido
+        for (PedidoDetalle detalle : pedido.getDetalle()) {
+            Long productoId = detalle.getProductoId();
+            int cantidadPedida = detalle.getCantidad().intValue();
+
+            ResponseEntity<Producto> response = productoFeign.listarProducto(productoId);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Producto producto = response.getBody();
+
+                // Verificar que el producto esté activo
+                if (!producto.isEstado()) {
+                    throw new RuntimeException("Producto con ID " + productoId + " no está activo.");
+                }
+
+                // Verificar que haya suficiente stock
+                if (producto.getCantidad() < cantidadPedida) {
+                    throw new RuntimeException("Stock insuficiente para el producto con ID " + productoId);
+                }
+
+                // Calcular y actualizar nueva cantidad
+                int nuevaCantidad = producto.getCantidad() - cantidadPedida;
+                productoFeign.actualizarCantidad(productoId, nuevaCantidad);
+
+            } else {
+                throw new RuntimeException("Producto con ID " + productoId + " no encontrado al registrar pedido.");
+            }
+        }
+
         return pedidoRepository.save(pedido);
     }
+
 
     @Override
     public List<Pedido> getAllPedidos() {

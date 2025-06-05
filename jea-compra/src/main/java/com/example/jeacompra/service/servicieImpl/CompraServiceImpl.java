@@ -9,6 +9,7 @@ import com.example.jeacompra.feign.ProductoFeign;
 import com.example.jeacompra.repository.CompraRepository;
 import com.example.jeacompra.service.CompraService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,7 +31,29 @@ public class CompraServiceImpl implements CompraService {
 
     @Override
     public Compra createCompra(Compra compra) {
-        return compraRepository.save(compra);
+        Compra nuevaCompra = compraRepository.save(compra);
+
+        for (CompraDetalle detalle : nuevaCompra.getDetalle()) {
+            Long productoId = detalle.getProductoId();
+            Double cantidadComprada = detalle.getCantidad();
+
+            ResponseEntity<Producto> response = productoFeign.listarProducto(productoId);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Producto producto = response.getBody();
+
+                if (!producto.isEstado()) {
+                    throw new RuntimeException("El producto con ID " + productoId + " está inactivo y no puede usarse en compras.");
+                }
+
+                // Calcular nueva cantidad y llamar solo al endpoint de cantidad
+                int nuevaCantidad = producto.getCantidad() + cantidadComprada.intValue();
+                productoFeign.actualizarCantidad(productoId, nuevaCantidad);
+            } else {
+                throw new RuntimeException("Producto con ID " + productoId + " no encontrado al registrar compra.");
+            }
+        }
+
+        return nuevaCompra;
     }
 
     @Override

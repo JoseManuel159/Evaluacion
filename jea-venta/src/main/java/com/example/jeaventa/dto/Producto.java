@@ -8,17 +8,19 @@ public class Producto {
     private Integer cantidad;
     private Double precioVenta;
     private Categoria categoria;
+    private boolean estado;
 
     public Producto() {
     }
 
-    public Producto(Long id, String codigo, String nombre, Integer cantidad, Double precioVenta, Categoria categoria) {
+    public Producto(Long id, String codigo, String nombre, Integer cantidad, Double precioVenta, Categoria categoria, boolean estado) {
         this.id = id;
         this.codigo = codigo;
         this.nombre = nombre;
         this.cantidad = cantidad;
         this.precioVenta = precioVenta;
         this.categoria = categoria;
+        this.estado = estado;
     }
 
     public Long getId() {
@@ -67,5 +69,13 @@ public class Producto {
 
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
+    }
+
+    public boolean isEstado() {
+        return estado;
+    }
+
+    public void setEstado(boolean estado) {
+        this.estado = estado;
     }
 }

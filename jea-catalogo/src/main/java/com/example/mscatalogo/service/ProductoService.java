@@ -19,4 +19,6 @@ public interface ProductoService {
     void eliminar(Long id);
 
     void desactivar(Long id);
+
+    Producto actualizarCantidad(Long id, Integer nuevaCantidad);
 }

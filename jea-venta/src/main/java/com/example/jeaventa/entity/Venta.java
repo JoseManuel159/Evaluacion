@@ -5,6 +5,7 @@ import com.example.jeaventa.dto.FormaPago;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -14,8 +15,12 @@ public class Venta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(nullable = false, unique = true)
     private String serie;
+
+    @Column(nullable = false, unique = true)
     private String numero;
+
     private String descripcion;
 
     @Column(name = "cliente_id")
@@ -47,6 +52,34 @@ public class Venta {
     public Venta() {
         this.fechaVenta = LocalDateTime.now();
     }
+
+    @PrePersist
+    public void generarSerieYNumero() {
+        if (this.serie == null) {
+            this.serie = generarSerie();
+        }
+        if (this.numero == null) {
+            this.numero = generarNumero();
+        }
+    }
+
+    private String generarSerie() {
+        String letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(3);
+        for (int i = 0; i < 3; i++) {
+            int index = random.nextInt(letras.length());
+            sb.append(letras.charAt(index));
+        }
+        return sb.toString();
+    }
+
+    private String generarNumero() {
+        SecureRandom random = new SecureRandom();
+        int numeroAleatorio = random.nextInt(1_000_000); // 0 a 999999
+        return String.format("%06d", numeroAleatorio);
+    }
+
 
     public Venta(Integer id, String serie, String numero, String descripcion, Long clienteId, Cliente cliente, List<VentaDetalle> detalle, LocalDateTime fechaVenta, Double baseImponible, Double igv, Double total, FormaPago formaPago, String estado, Long formapagoId) {
         this.id = id;
