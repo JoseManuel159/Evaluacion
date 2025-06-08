@@ -22,6 +22,8 @@ export class HomeLayoutComponent {
   constructor(private router: Router) {
     const accesosData = localStorage.getItem('accesos');
     this.accesos = accesosData ? JSON.parse(accesosData) : [];
+    localStorage.getItem('accesos')
+
   }
 
 
@@ -33,4 +35,6 @@ export class HomeLayoutComponent {
   toggleSidebar() {
     this.showSidebar = !this.showSidebar;
   }
+
+
 }
