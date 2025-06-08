@@ -55,7 +55,7 @@ export class ProductosComponent implements OnInit {
         this.productos = data.map(producto => {
           if (producto.imagen) {
             // Asegúrate de que sea el nombre correcto del campo (¿imagen o nombreArchivo?)
-            producto.urlImagen = `http://localhost:58046/imagenes/${encodeURIComponent(producto.imagen)}`;
+            producto.urlImagen = `http://localhost:8085/imagenes/${encodeURIComponent(producto.imagen)}`;
           } else {
             producto.urlImagen = '';
           }

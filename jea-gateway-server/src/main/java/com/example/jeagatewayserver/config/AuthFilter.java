@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> {
+
     private WebClient.Builder webClient;
 
 
@@ -23,6 +24,10 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
     @Override
     public GatewayFilter apply(Config config) {
         return (((exchange, chain) -> {
+            String path = exchange.getRequest().getURI().getPath();
+            if (path.startsWith("/imagenes")) {
+                return chain.filter(exchange); // Deja pasar sin validar token
+            }
             if(!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION))
                 return onError(exchange, HttpStatus.BAD_REQUEST);
             String tokenHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
