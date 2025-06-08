@@ -24,11 +24,16 @@ export class LoginComponent {
         next: (res) => {
           localStorage.setItem('token', res.token);
 
-          // Opcional: extraer el id del token
+          // Decodificar el token para obtener el ID del usuario
           const payload = JSON.parse(atob(res.token.split('.')[1]));
           localStorage.setItem('userId', payload.id);
 
-          this.router.navigate(['/categorias']); // o tu página principal
+          // Guardar nombre de usuario y accesos
+          localStorage.setItem('userName', res.userName);
+          localStorage.setItem('accesos', JSON.stringify(res.accesos));
+
+          // Redirigir a la página principal
+          this.router.navigate(['/categorias']); // o /dashboard
         },
         error: () => {
           alert('Credenciales inválidas');

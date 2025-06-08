@@ -1,5 +1,6 @@
 package com.example.jeaauth.controller;
 
+import com.example.jeaauth.dto.AuthResponseDto;
 import com.example.jeaauth.dto.AuthUserDto;
 import com.example.jeaauth.dto.TokenDto;
 import com.example.jeaauth.entity.AuthUser;
@@ -15,12 +16,13 @@ public class AuthUserController {
     AuthUserService authUserService;
 
     @PostMapping("/login")
-    public ResponseEntity<TokenDto> login(@RequestBody AuthUserDto authUserDto) {
-        TokenDto tokenDto = authUserService.login(authUserDto);
-        if (tokenDto == null)
+    public ResponseEntity<AuthResponseDto> login(@RequestBody AuthUserDto authUserDto) {
+        AuthResponseDto response = authUserService.login(authUserDto);
+        if (response == null)
             return ResponseEntity.badRequest().build();
-        return ResponseEntity.ok(tokenDto);
+        return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/validate")
     public ResponseEntity<TokenDto> validate(@RequestParam String token) {
