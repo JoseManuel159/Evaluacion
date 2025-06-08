@@ -11,6 +11,10 @@ import {
   MatTable
 } from "@angular/material/table";
 import {DecimalPipe, NgClass, NgIf} from "@angular/common";
+import {MatDialog} from "@angular/material/dialog";
+import {FormproductoComponent} from "./formproducto/formproducto.component";
+import {MatButton} from "@angular/material/button";
+import {MaterialModule} from "../../material/material.module";
 
 @Component({
   selector: 'app-productos',
@@ -28,21 +32,40 @@ import {DecimalPipe, NgClass, NgIf} from "@angular/common";
     MatRow,
     MatRowDef,
     DecimalPipe,
-    NgClass
+    NgClass,
+    MatButton,
+    MaterialModule
   ],
   templateUrl: './productos.component.html',
   styleUrl: './productos.component.css'
 })
 export class ProductosComponent implements OnInit {
   productos: Producto[] = [];
-  columnas: string[] = ['id', 'codigo', 'nombre', 'cantidad', 'precioVenta', 'estado', 'categoria'];
+  columnas: string[] = ['id', 'codigo', 'nombre', 'imagen', 'cantidad', 'precioVenta', 'estado', 'categoria'];
 
-  constructor(private productoService: ProductoService) {}
+  constructor(private productoService: ProductoService, public dialog: MatDialog) {}
+
+  getUrlImagen(nombreArchivo: string): string {
+    return nombreArchivo ? `http://tu-backend.com/uploads/${nombreArchivo}` : '';
+  }
 
   ngOnInit(): void {
     this.productoService.listar().subscribe({
       next: data => this.productos = data,
       error: err => console.error('Error al obtener productos', err)
+    });
+  }
+
+  abrirDialogoNuevoProducto(): void {
+    const dialogRef = this.dialog.open(FormproductoComponent, {
+      width: '900px',
+      // Puedes pasar data si quieres
+      // data: { ... }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('El diálogo se cerró');
+      // Aquí podrías refrescar la lista si guardaron algo
     });
   }
 }

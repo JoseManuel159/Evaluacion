@@ -59,4 +59,38 @@ export class ProductoService {
       headers: this.getHeaders()
     });
   }
+
+  crearConImagen(producto: Producto, imagen?: File): Observable<Producto> {
+    const formData = new FormData();
+    formData.append('codigo', producto.codigo);
+    formData.append('nombre', producto.nombre);
+    formData.append('cantidad', producto.cantidad?.toString() || '0');
+    formData.append('precioVenta', producto.precioVenta?.toString() || '0');
+    formData.append('costoCompra', producto.costoCompra?.toString() || '0');
+    formData.append('categoriaId', producto.categoria?.id?.toString() || '0');
+    if (producto.descripcion) formData.append('descripcion', producto.descripcion);
+    if (imagen) formData.append('imagen', imagen);
+
+    return this.http.post<Producto>(`${this.apiUrl}/crear-con-imagen`, formData, {
+      headers: this.getHeaders()
+    });
+  }
+
+  actualizarConImagen(id: number, producto: Producto, nuevaImagen?: File): Observable<Producto> {
+    const formData = new FormData();
+    formData.append('codigo', producto.codigo);
+    formData.append('nombre', producto.nombre);
+    formData.append('cantidad', producto.cantidad?.toString() || '0');
+    formData.append('precioVenta', producto.precioVenta?.toString() || '0');
+    formData.append('costoCompra', producto.costoCompra?.toString() || '0');
+    formData.append('estado', producto.estado?.toString() || 'false');
+    formData.append('categoriaId', producto.categoria?.id?.toString() || '0');
+    if (producto.descripcion) formData.append('descripcion', producto.descripcion);
+    if (nuevaImagen) formData.append('imagen', nuevaImagen);
+
+    return this.http.put<Producto>(`${this.apiUrl}/${id}/actualizar-con-imagen`, formData, {
+      headers: this.getHeaders()
+    });
+  }
+
 }

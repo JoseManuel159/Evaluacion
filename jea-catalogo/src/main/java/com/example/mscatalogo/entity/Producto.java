@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-
 public class Producto {
 
     @Id
@@ -39,6 +38,15 @@ public class Producto {
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
+    private String imagen;
+
+    public String getUrlImagen() {
+        if (this.imagen != null && !this.imagen.isEmpty()) {
+            return "http://localhost:8085/imagenes/" + this.imagen;
+        }
+        return null;
+    }
+
 
     @PrePersist
     protected void onCreate() {
@@ -54,7 +62,7 @@ public class Producto {
     public Producto() {
     }
 
-    public Producto(Long id, String codigo,String nombre, String descripcion, Integer cantidad, Double precioVenta, Double costoCompra, boolean estado, LocalDateTime fechaActualizacion, LocalDateTime fechaCreacion, Categoria categoria) {
+    public Producto(Long id, String codigo,String nombre, String descripcion, Integer cantidad, Double precioVenta, Double costoCompra, boolean estado, LocalDateTime fechaActualizacion, LocalDateTime fechaCreacion, Categoria categoria, String imagen) {
         this.id = id;
         this.nombre = nombre;
         this.codigo = codigo;
@@ -66,6 +74,7 @@ public class Producto {
         this.fechaActualizacion = fechaActualizacion;
         this.fechaCreacion = fechaCreacion;
         this.categoria = categoria;
+        this.imagen = imagen;
     }
 
     public Long getId() {
@@ -154,5 +163,13 @@ public class Producto {
 
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
+    }
+
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
 }

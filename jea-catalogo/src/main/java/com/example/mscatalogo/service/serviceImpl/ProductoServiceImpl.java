@@ -5,9 +5,16 @@ import com.example.mscatalogo.repository.ProductoRepository;
 import com.example.mscatalogo.service.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ProductoServiceImpl implements ProductoService {
@@ -15,8 +22,11 @@ public class ProductoServiceImpl implements ProductoService {
     @Autowired
     private ProductoRepository productoRepository;
 
+    private static final String RUTA_IMAGENES = "C:\\ciclo-5\\Contabilidad\\sistema-ventas\\imagenes";
+
+
     @Override
-    public Producto guardar(Producto producto) {
+    public Producto guardarConImagen(Producto producto, MultipartFile imagenFile) {
         boolean existeCodigo = productoRepository.existsByCodigo(producto.getCodigo());
         boolean existeNombre = productoRepository.existsByNombre(producto.getNombre());
 
@@ -24,8 +34,22 @@ public class ProductoServiceImpl implements ProductoService {
             throw new RuntimeException("Ya existe un producto con ese código o nombre");
         }
 
+        // Procesar imagen
+        if (imagenFile != null && !imagenFile.isEmpty()) {
+            try {
+                Files.createDirectories(Paths.get(RUTA_IMAGENES));
+                String nombreArchivo = UUID.randomUUID() + "_" + imagenFile.getOriginalFilename();
+                Path rutaArchivo = Paths.get(RUTA_IMAGENES).resolve(nombreArchivo);
+                Files.copy(imagenFile.getInputStream(), rutaArchivo, StandardCopyOption.REPLACE_EXISTING);
+                producto.setImagen(nombreArchivo);
+            } catch (IOException e) {
+                throw new RuntimeException("Error al guardar la imagen: " + e.getMessage());
+            }
+        }
+
         return productoRepository.save(producto);
     }
+
 
     @Override
     public List<Producto> listar() {
@@ -83,5 +107,38 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setCantidad(nuevaCantidad);
         return productoRepository.save(producto);
     }
+
+
+    @Override
+    public Producto actualizarConImagen(Long id, Producto productoActualizado, MultipartFile nuevaImagen) {
+        Producto productoExistente = productoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + id));
+
+        // Actualizar datos
+        productoExistente.setCodigo(productoActualizado.getCodigo());
+        productoExistente.setNombre(productoActualizado.getNombre());
+        productoExistente.setDescripcion(productoActualizado.getDescripcion());
+        productoExistente.setCantidad(productoActualizado.getCantidad());
+        productoExistente.setPrecioVenta(productoActualizado.getPrecioVenta());
+        productoExistente.setCostoCompra(productoActualizado.getCostoCompra());
+        productoExistente.setCategoria(productoActualizado.getCategoria());
+        productoExistente.setEstado(productoActualizado.isEstado());
+
+        // Si llega nueva imagen, la guardamos y reemplazamos
+        if (nuevaImagen != null && !nuevaImagen.isEmpty()) {
+            try {
+                Files.createDirectories(Paths.get(RUTA_IMAGENES));
+                String nombreArchivo = UUID.randomUUID() + "_" + nuevaImagen.getOriginalFilename();
+                Path rutaArchivo = Paths.get(RUTA_IMAGENES).resolve(nombreArchivo);
+                Files.copy(nuevaImagen.getInputStream(), rutaArchivo, StandardCopyOption.REPLACE_EXISTING);
+                productoExistente.setImagen(nombreArchivo);
+            } catch (IOException e) {
+                throw new RuntimeException("Error al guardar la nueva imagen: " + e.getMessage());
+            }
+        }
+
+        return productoRepository.save(productoExistente);
+    }
+
 
 }

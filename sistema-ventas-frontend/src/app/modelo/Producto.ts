@@ -11,5 +11,6 @@ export interface Producto {
   estado?: boolean;
   fechaCreacion?: string;
   fechaActualizacion?: string;
-  categoria?: Categoria;
+  categoria: Categoria;
+  imagen?: string;
 }

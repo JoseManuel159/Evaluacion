@@ -33,7 +33,7 @@ spring:
         - id: jea-catalogo-service
           uri: lb://jea-catalogo-service
           predicates:
-            - Path=/categoria/**, /producto/**
+            - Path=/categoria/**, /producto/**, /imagenes/**
           filters:
             - AuthFilter
 

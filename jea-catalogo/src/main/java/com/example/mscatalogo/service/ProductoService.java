@@ -2,13 +2,14 @@ package com.example.mscatalogo.service;
 
 
 import com.example.mscatalogo.entity.Producto;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ProductoService {
 
-    Producto guardar(Producto producto);
+    Producto guardarConImagen(Producto producto, MultipartFile imagenFile);
 
     List<Producto> listar();
 
@@ -21,4 +22,7 @@ public interface ProductoService {
     void desactivar(Long id);
 
     Producto actualizarCantidad(Long id, Integer nuevaCantidad);
+
+    Producto actualizarConImagen(Long id, Producto productoActualizado, MultipartFile nuevaImagen);
+
 }

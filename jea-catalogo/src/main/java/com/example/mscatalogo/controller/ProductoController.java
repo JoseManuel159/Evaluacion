@@ -1,12 +1,23 @@
 package com.example.mscatalogo.controller;
 
+import com.example.mscatalogo.entity.Categoria;
 import com.example.mscatalogo.entity.Producto;
 import com.example.mscatalogo.service.ProductoService;
+import io.github.classgraph.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/producto")
@@ -15,11 +26,38 @@ public class ProductoController {
     @Autowired
     private ProductoService productoService;
 
-    @PostMapping
-    public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
-        Producto nuevo = productoService.guardar(producto);
-        return ResponseEntity.ok(nuevo);
+    @PostMapping(value = "/crear-con-imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Producto> crearConImagen(
+            @RequestParam("codigo") String codigo,
+            @RequestParam("nombre") String nombre,
+            @RequestParam(value = "descripcion", required = false) String descripcion,
+            @RequestParam("cantidad") Integer cantidad,
+            @RequestParam("precioVenta") Double precioVenta,
+            @RequestParam("costoCompra") Double costoCompra,
+            @RequestParam("categoriaId") Long categoriaId,
+            @RequestParam(value = "imagen", required = false) MultipartFile imagenFile
+    ) {
+        try {
+            Producto producto = new Producto();
+            producto.setCodigo(codigo);
+            producto.setNombre(nombre);
+            producto.setDescripcion(descripcion);
+            producto.setCantidad(cantidad);
+            producto.setPrecioVenta(precioVenta);
+            producto.setCostoCompra(costoCompra);
+
+            Categoria categoria = new Categoria();
+            categoria.setId(categoriaId);
+            producto.setCategoria(categoria);
+
+            Producto nuevo = productoService.guardarConImagen(producto, imagenFile);
+            return ResponseEntity.ok(nuevo);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
+
+
 
     @GetMapping
     public ResponseEntity<List<Producto>> listarProductos() {
@@ -64,5 +102,40 @@ public class ProductoController {
         Producto productoActualizado = productoService.actualizarCantidad(id, nuevaCantidad);
         return ResponseEntity.ok(productoActualizado);
     }
+
+    @PutMapping(value = "/{id}/actualizar-con-imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Producto> actualizarConImagen(
+            @PathVariable Long id,
+            @RequestParam("codigo") String codigo,
+            @RequestParam("nombre") String nombre,
+            @RequestParam(value = "descripcion", required = false) String descripcion,
+            @RequestParam("cantidad") Integer cantidad,
+            @RequestParam("precioVenta") Double precioVenta,
+            @RequestParam("costoCompra") Double costoCompra,
+            @RequestParam("estado") boolean estado,
+            @RequestParam("categoriaId") Long categoriaId,
+            @RequestParam(value = "imagen", required = false) MultipartFile nuevaImagen
+    ) {
+        try {
+            Producto productoActualizado = new Producto();
+            productoActualizado.setCodigo(codigo);
+            productoActualizado.setNombre(nombre);
+            productoActualizado.setDescripcion(descripcion);
+            productoActualizado.setCantidad(cantidad);
+            productoActualizado.setPrecioVenta(precioVenta);
+            productoActualizado.setCostoCompra(costoCompra);
+            productoActualizado.setEstado(estado);
+
+            Categoria categoria = new Categoria();
+            categoria.setId(categoriaId);
+            productoActualizado.setCategoria(categoria);
+
+            Producto actualizado = productoService.actualizarConImagen(id, productoActualizado, nuevaImagen);
+            return ResponseEntity.ok(actualizado);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 
 }
