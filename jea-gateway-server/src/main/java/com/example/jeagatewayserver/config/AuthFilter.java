@@ -31,7 +31,7 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
                 return onError(exchange, HttpStatus.BAD_REQUEST);
             return webClient.build()
                     .post()
-                    .uri("http://ms-auth-service/auth/validate?token=" + chunks[1])
+                    .uri("http://jea-auth-service/auth/validate?token=" + chunks[1])
                     .retrieve().bodyToMono(TokenDto.class)
                     .map(t -> {
                         t.getToken();
