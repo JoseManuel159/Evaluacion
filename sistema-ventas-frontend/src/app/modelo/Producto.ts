@@ -12,5 +12,6 @@ export interface Producto {
   fechaCreacion?: string;
   fechaActualizacion?: string;
   categoria: Categoria;
-  imagen?: string;
+  imagen?: string; // o el nombre del atributo real
+  urlImagen?: string; // <- este se usará solo en el frontend
 }
