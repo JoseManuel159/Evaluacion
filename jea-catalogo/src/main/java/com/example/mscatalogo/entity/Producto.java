@@ -22,7 +22,7 @@ public class Producto {
 
     private String descripcion;
 
-    private Integer cantidad;
+    private Integer cantidad = 0;
 
     private Double precioVenta;
 
@@ -39,13 +39,6 @@ public class Producto {
     private Categoria categoria;
 
     private String imagen;
-
-    public String getUrlImagen() {
-        if (this.imagen != null && !this.imagen.isEmpty()) {
-            return "http://localhost:8085/imagenes/" + this.imagen;
-        }
-        return null;
-    }
 
 
     @PrePersist

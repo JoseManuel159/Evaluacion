@@ -45,10 +45,6 @@ export class ProductosComponent implements OnInit {
 
   constructor(private productoService: ProductoService, public dialog: MatDialog) {}
 
-  getUrlImagen(nombreArchivo: string): string {
-    return nombreArchivo ? `http://tu-backend.com/uploads/${nombreArchivo}` : '';
-  }
-
   ngOnInit(): void {
     this.productoService.listar().subscribe({
       next: data => {
