@@ -3,6 +3,7 @@ package com.example.jeaproveedor.service.serviceImpl;
 import com.example.jeaproveedor.entity.Proveedor;
 import com.example.jeaproveedor.repository.ProveedorRepository;
 import com.example.jeaproveedor.service.ProveedorService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,11 +53,19 @@ public class ProveedorServiceImpl implements ProveedorService {
         proveedorRepository.deleteById(id);
     }
 
-
     @Override
     public void desactivar(Long id) {
-        cambiarEstado(id, false);
+        Optional<Proveedor> proveedorOptional = proveedorRepository.findById(id);
+        if (proveedorOptional.isPresent()) {
+            Proveedor proveedor = proveedorOptional.get();
+            proveedor.setEstado(false);
+            proveedorRepository.save(proveedor);
+        } else {
+            throw new EntityNotFoundException("Proveedor con ID " + id + " no encontrado.");
+        }
     }
+
+
 
     @Override
     public Optional<Proveedor> buscarPorRuc(String ruc) {

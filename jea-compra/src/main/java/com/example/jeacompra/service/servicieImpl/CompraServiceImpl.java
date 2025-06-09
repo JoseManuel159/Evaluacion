@@ -2,10 +2,12 @@ package com.example.jeacompra.service.servicieImpl;
 
 import com.example.jeacompra.dto.FormaPago;
 import com.example.jeacompra.dto.Producto;
+import com.example.jeacompra.dto.Proveedor;
 import com.example.jeacompra.entity.Compra;
 import com.example.jeacompra.entity.CompraDetalle;
 import com.example.jeacompra.feign.FormaPagoFeign;
 import com.example.jeacompra.feign.ProductoFeign;
+import com.example.jeacompra.feign.ProveedorFeign;
 import com.example.jeacompra.repository.CompraRepository;
 import com.example.jeacompra.service.CompraService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +33,29 @@ public class CompraServiceImpl implements CompraService {
     @Autowired
     private FormaPagoFeign formaPagoFeign;
 
+    @Autowired
+    private ProveedorFeign proveedorFeign;
+
 
     @Override
     public Compra createCompra(Compra compra) {
         if (compra.getDescripcion() == null || compra.getDescripcion().trim().isEmpty()) {
             compra.setDescripcion("Compra registrada");
         }
+
+        Long proveedorId = compra.getProveedorId();
+        ResponseEntity<Proveedor> proveedorResponse = proveedorFeign.obtenerproveedor(proveedorId);
+
+        if (!proveedorResponse.getStatusCode().is2xxSuccessful() || proveedorResponse.getBody() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Proveedor con ID " + proveedorId + " no encontrado.");
+        }
+
+        Proveedor proveedor = proveedorResponse.getBody();
+
+        if (!Boolean.TRUE.equals(proveedor.getEstado())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El proveedor con ID " + proveedorId + " está inactivo.");
+        }
+
 
         for (CompraDetalle detalle : compra.getDetalle()) {
             Long productoId = detalle.getProductoId();
@@ -93,6 +112,12 @@ public class CompraServiceImpl implements CompraService {
         compra.setFormaPago(formaPago);
 
         compra.setDetalle(detalles);
+
+        ResponseEntity<Proveedor> proveedorResponse = proveedorFeign.obtenerproveedor(compra.getProveedorId());
+        if (proveedorResponse.getStatusCode().is2xxSuccessful() && proveedorResponse.getBody() != null) {
+            compra.setProveedor(proveedorResponse.getBody());
+        }
+
         return Optional.of(compra);
     }
 
@@ -118,6 +143,12 @@ public class CompraServiceImpl implements CompraService {
         // Obtener y setear la forma de pago
         FormaPago formaPago = formaPagoFeign.obtenerFormaPago(compra.getFormapagoId()).getBody();
         compra.setFormaPago(formaPago);
+
+        ResponseEntity<Proveedor> proveedorResponse = proveedorFeign.obtenerproveedor(compra.getProveedorId());
+        if (proveedorResponse.getStatusCode().is2xxSuccessful() && proveedorResponse.getBody() != null) {
+            compra.setProveedor(proveedorResponse.getBody());
+        }
+
 
         return compra;
     }

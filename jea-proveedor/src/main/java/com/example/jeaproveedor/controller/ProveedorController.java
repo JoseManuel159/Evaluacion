@@ -3,7 +3,6 @@ package com.example.jeaproveedor.controller;
 
 import com.example.jeaproveedor.entity.Proveedor;
 import com.example.jeaproveedor.service.ProveedorService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,6 +58,7 @@ public class ProveedorController {
         proveedorService.desactivar(id);
         return ResponseEntity.noContent().build();
     }
+
 
     @GetMapping("/buscar")
     public ResponseEntity<Proveedor> buscarPorRuc(@RequestParam String ruc) {

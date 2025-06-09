@@ -1,6 +1,7 @@
 package com.example.jeacompra.entity;
 
 import com.example.jeacompra.dto.FormaPago;
+import com.example.jeacompra.dto.Proveedor;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
@@ -21,6 +22,12 @@ public class Compra {
     private String numero;
 
     private String descripcion;
+
+    @Column(name = "proveedor_id")
+    private Long proveedorId;
+
+    @Transient
+    private Proveedor proveedor;
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -96,11 +103,13 @@ public class Compra {
         this.fechaCompra = LocalDateTime.now();
     }
 
-    public Compra(Long id, String serie, String numero, String descripcion, List<CompraDetalle> detalle, LocalDateTime fechaCompra, Double baseImponible, Double igv, Double total, Long formapagoId, FormaPago formaPago) {
+    public Compra(Long id, String serie, String numero, String descripcion, Long proveedorId, Proveedor proveedor, List<CompraDetalle> detalle, LocalDateTime fechaCompra, Double baseImponible, Double igv, Double total, Long formapagoId, FormaPago formaPago) {
         this.id = id;
         this.serie = serie;
         this.numero = numero;
         this.descripcion = descripcion;
+        this.proveedorId = proveedorId;
+        this.proveedor = proveedor;
         this.detalle = detalle;
         this.fechaCompra = fechaCompra;
         this.baseImponible = baseImponible;
@@ -196,5 +205,21 @@ public class Compra {
 
     public void setFormaPago(FormaPago formaPago) {
         this.formaPago = formaPago;
+    }
+
+    public Long getProveedorId() {
+        return proveedorId;
+    }
+
+    public void setProveedorId(Long proveedorId) {
+        this.proveedorId = proveedorId;
+    }
+
+    public Proveedor getProveedor() {
+        return proveedor;
+    }
+
+    public void setProveedor(Proveedor proveedor) {
+        this.proveedor = proveedor;
     }
 }
