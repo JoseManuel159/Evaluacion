@@ -46,7 +46,6 @@ public class VentaController {
         ventaService.deleteVenta(id);
         return ResponseEntity.noContent().build();
     }
-
     @GetMapping("/buscar-por-fechas")
     public ResponseEntity<List<Venta>> buscarPorRangoFechas(
             @RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
@@ -74,5 +73,6 @@ public class VentaController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
 
 }

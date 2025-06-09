@@ -71,3 +71,10 @@ spring:
             - Path=/compra/**
           filters:
             - AuthFilter
+
+        - id: jea-proveedor-service
+          uri: lb://jea-proveedor-service
+          predicates:
+            - Path=/proveedor/**
+          filters:
+            - AuthFilter
