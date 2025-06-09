@@ -9,9 +9,12 @@ import com.example.jeacompra.feign.ProductoFeign;
 import com.example.jeacompra.repository.CompraRepository;
 import com.example.jeacompra.service.CompraService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,30 +34,42 @@ public class CompraServiceImpl implements CompraService {
 
     @Override
     public Compra createCompra(Compra compra) {
-        Compra nuevaCompra = compraRepository.save(compra);
+        if (compra.getDescripcion() == null || compra.getDescripcion().trim().isEmpty()) {
+            compra.setDescripcion("Compra registrada");
+        }
 
-        for (CompraDetalle detalle : nuevaCompra.getDetalle()) {
+        for (CompraDetalle detalle : compra.getDetalle()) {
             Long productoId = detalle.getProductoId();
             Double cantidadComprada = detalle.getCantidad();
 
+            // Obtener información del producto desde el microservicio
             ResponseEntity<Producto> response = productoFeign.listarProducto(productoId);
+
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 Producto producto = response.getBody();
 
                 if (!producto.isEstado()) {
-                    throw new RuntimeException("El producto con ID " + productoId + " está inactivo y no puede usarse en compras.");
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Producto con ID " + productoId + " está inactivo.");
                 }
 
-                // Calcular nueva cantidad y llamar solo al endpoint de cantidad
+
+                detalle.setPrecio(producto.getCostoCompra());
+
+                // Actualizar el stock sumando la cantidad comprada
                 int nuevaCantidad = producto.getCantidad() + cantidadComprada.intValue();
                 productoFeign.actualizarCantidad(productoId, nuevaCantidad);
+
             } else {
-                throw new RuntimeException("Producto con ID " + productoId + " no encontrado al registrar compra.");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto con ID " + productoId + " no encontrado al registrar compra.");
             }
         }
 
+        // Guardar la compra después de procesar los detalles
+        Compra nuevaCompra = compraRepository.save(compra);
+
         return nuevaCompra;
     }
+
 
     @Override
     public List<Compra> getAllCompra() {
@@ -89,5 +104,53 @@ public class CompraServiceImpl implements CompraService {
     @Override
     public void deleteCompra(Long id) {
         compraRepository.deleteById(id);
+    }
+
+    private Compra cargarCompraCompleta(Compra compra) {
+        // Obtener y setear los productos de los detalles
+        List<CompraDetalle> detalles = compra.getDetalle().stream().map(detalle -> {
+            Producto producto = productoFeign.listarProducto(detalle.getProductoId()).getBody();
+            detalle.setProducto(producto);
+            return detalle;
+        }).collect(Collectors.toList());
+        compra.setDetalle(detalles);
+
+        // Obtener y setear la forma de pago
+        FormaPago formaPago = formaPagoFeign.obtenerFormaPago(compra.getFormapagoId()).getBody();
+        compra.setFormaPago(formaPago);
+
+        return compra;
+    }
+
+
+    @Override
+    public List<Compra> buscarPorRangoFechas(LocalDateTime inicio, LocalDateTime fin) {
+        List<Compra> compras = compraRepository.findByFechaCompraBetween(inicio, fin);
+
+        return compras.stream()
+                .map(this::cargarCompraCompleta)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Compra> buscarPorSerie(String serie) {
+        return compraRepository.findBySerie(serie)
+                .stream()
+                .map(this::cargarCompraCompleta)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Compra> buscarPorNumero(String numero) {
+        return compraRepository.findByNumero(numero)
+                .stream()
+                .map(this::cargarCompraCompleta)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Compra> buscarPorSerieYNumero(String serie, String numero) {
+        return compraRepository.findBySerieAndNumero(serie, numero)
+                .map(this::cargarCompraCompleta);
     }
 }

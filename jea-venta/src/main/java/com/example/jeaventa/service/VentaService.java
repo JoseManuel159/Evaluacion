@@ -2,6 +2,7 @@ package com.example.jeaventa.service;
 
 import com.example.jeaventa.entity.Venta;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,4 +16,11 @@ public interface VentaService {
     Venta updateVenta(Integer id, Venta venta);
 
     void deleteVenta(Integer id);
+
+    List<Venta> buscarPorRangoFechas(LocalDateTime inicio, LocalDateTime fin);
+
+    List<Venta> buscarPorSerie(String serie);
+    List<Venta> buscarPorNumero(String numero);
+    Optional<Venta> buscarPorSerieYNumero(String serie, String numero);
+
 }

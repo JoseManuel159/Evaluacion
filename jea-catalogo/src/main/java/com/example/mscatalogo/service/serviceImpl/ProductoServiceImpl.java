@@ -141,4 +141,10 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
 
+    @Override
+    public Optional<Producto> buscarPorCodigo(String codigo) {
+        return productoRepository.findByCodigo(codigo);
+    }
+
+
 }

@@ -4,6 +4,7 @@ import com.example.jeacompra.dto.FormaPago;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -38,7 +39,61 @@ public class Compra {
     @Transient
     private FormaPago formaPago;
 
+    @PrePersist
+    public void prePersist() {
+        calcularTotales();
+        generarSerieYNumero();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        calcularTotales();
+    }
+
+    private void calcularTotales() {
+        this.baseImponible = 0.0;
+        this.igv = 0.0;
+        this.total = 0.0;
+
+        if (detalle != null) {
+            for (CompraDetalle d : detalle) {
+                d.calcularMontos();
+                this.baseImponible += d.getBaseImponible();
+                this.igv += d.getIgv();
+                this.total += d.getTotal();
+            }
+        }
+    }
+
+    private void generarSerieYNumero() {
+        if (this.serie == null) {
+            this.serie = generarSerie();
+        }
+        if (this.numero == null) {
+            this.numero = generarNumero();
+        }
+    }
+
+
+    private String generarSerie() {
+        String letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(3);
+        for (int i = 0; i < 3; i++) {
+            int index = random.nextInt(letras.length());
+            sb.append(letras.charAt(index));
+        }
+        return sb.toString();
+    }
+
+    private String generarNumero() {
+        SecureRandom random = new SecureRandom();
+        int numeroAleatorio = random.nextInt(1_000_000); // 0 a 999999
+        return String.format("%06d", numeroAleatorio);
+    }
+
     public Compra() {
+        this.fechaCompra = LocalDateTime.now();
     }
 
     public Compra(Long id, String serie, String numero, String descripcion, List<CompraDetalle> detalle, LocalDateTime fechaCompra, Double baseImponible, Double igv, Double total, Long formapagoId, FormaPago formaPago) {

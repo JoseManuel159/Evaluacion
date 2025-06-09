@@ -25,4 +25,6 @@ public interface ProductoService {
 
     Producto actualizarConImagen(Long id, Producto productoActualizado, MultipartFile nuevaImagen);
 
+    Optional<Producto> buscarPorCodigo(String codigo);
+
 }

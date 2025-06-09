@@ -3,9 +3,11 @@ package com.example.jeaventa.controller;
 import com.example.jeaventa.entity.Venta;
 import com.example.jeaventa.service.VentaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -44,4 +46,33 @@ public class VentaController {
         ventaService.deleteVenta(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/buscar-por-fechas")
+    public ResponseEntity<List<Venta>> buscarPorRangoFechas(
+            @RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
+            @RequestParam("fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fin
+    ) {
+        List<Venta> ventas = ventaService.buscarPorRangoFechas(inicio, fin);
+        return ResponseEntity.ok(ventas);
+    }
+
+    @GetMapping("/buscar/serie")
+    public ResponseEntity<List<Venta>> buscarPorSerie(@RequestParam String serie) {
+        return ResponseEntity.ok(ventaService.buscarPorSerie(serie));
+    }
+
+    @GetMapping("/buscar/numero")
+    public ResponseEntity<List<Venta>> buscarPorNumero(@RequestParam String numero) {
+        return ResponseEntity.ok(ventaService.buscarPorNumero(numero));
+    }
+
+    @GetMapping("/buscar/serie-numero")
+    public ResponseEntity<Venta> buscarPorSerieYNumero(
+            @RequestParam String serie,
+            @RequestParam String numero) {
+        return ventaService.buscarPorSerieYNumero(serie, numero)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }

@@ -5,6 +5,10 @@ import {HomeLayoutComponent} from "./pages/home-layout.component";
 import {AuthGuard} from "./guards/auth.guard";
 import {ClientesComponent} from "./pages/clientes/clientes.component";
 import {ProductosComponent} from "./pages/productos/productos.component";
+import {VentasComponent} from "./pages/ventas/ventas.component";
+import {ComprasComponent} from "./pages/compras/compras.component";
+import {PagosComponent} from "./pages/pagos/pagos.component";
+import {PedidosComponent} from "./pages/pedidos/pedidos.component";
 
 export const routes: Routes = [
   {
@@ -15,6 +19,10 @@ export const routes: Routes = [
       { path: 'categorias', component: CategoriasComponent },
       { path: 'cliente', component: ClientesComponent },
       { path: 'producto', component: ProductosComponent },
+      { path: 'venta', component: VentasComponent },
+      { path: 'compra', component: ComprasComponent },
+      { path: 'pago', component: PagosComponent },
+      { path: 'usuario', component: PedidosComponent },
       { path: '', redirectTo: 'categorias', pathMatch: 'full' }
     ]
   },

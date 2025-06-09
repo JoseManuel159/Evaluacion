@@ -22,7 +22,7 @@ public class Producto {
 
     private String descripcion;
 
-    private Integer cantidad = 0;
+    private Integer cantidad;
 
     private Double precioVenta;
 
@@ -53,6 +53,7 @@ public class Producto {
     }
 
     public Producto() {
+        this.cantidad = 0; // Cantidad por defecto
     }
 
     public Producto(Long id, String codigo,String nombre, String descripcion, Integer cantidad, Double precioVenta, Double costoCompra, boolean estado, LocalDateTime fechaActualizacion, LocalDateTime fechaCreacion, Categoria categoria, String imagen) {

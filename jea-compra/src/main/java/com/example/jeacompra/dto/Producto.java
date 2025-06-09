@@ -6,19 +6,19 @@ public class Producto {
     private String codigo;
     private String nombre;
     private Integer cantidad;
-    private Double precioVenta;
+    private Double costoCompra;
     private Categoria categoria;
     private boolean estado;
 
     public Producto() {
     }
 
-    public Producto(Long id, String codigo, String nombre, Integer cantidad, Double precioVenta, Categoria categoria, boolean estado) {
+    public Producto(Long id, String codigo, String nombre, Integer cantidad , Double costoCompra, Categoria categoria, boolean estado) {
         this.id = id;
         this.codigo = codigo;
         this.nombre = nombre;
         this.cantidad = cantidad;
-        this.precioVenta = precioVenta;
+        this.costoCompra = costoCompra;
         this.categoria = categoria;
         this.estado = estado;
     }
@@ -55,13 +55,6 @@ public class Producto {
         this.cantidad = cantidad;
     }
 
-    public Double getPrecioVenta() {
-        return precioVenta;
-    }
-
-    public void setPrecioVenta(Double precioVenta) {
-        this.precioVenta = precioVenta;
-    }
 
     public Categoria getCategoria() {
         return categoria;
@@ -77,5 +70,13 @@ public class Producto {
 
     public void setEstado(boolean estado) {
         this.estado = estado;
+    }
+
+    public Double getCostoCompra() {
+        return costoCompra;
+    }
+
+    public void setCostoCompra(Double costoCompra) {
+        this.costoCompra = costoCompra;
     }
 }

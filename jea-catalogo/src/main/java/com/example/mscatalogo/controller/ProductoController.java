@@ -138,4 +138,12 @@ public class ProductoController {
     }
 
 
+    @GetMapping("/buscar/codigo/{codigo}")
+    public ResponseEntity<Producto> buscarPorCodigo(@PathVariable String codigo) {
+        return productoService.buscarPorCodigo(codigo)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+
 }

@@ -46,15 +46,34 @@ public class Venta {
     @Transient
     private FormaPago formaPago;
 
-    private String estado;
-
-
-    public Venta() {
-        this.fechaVenta = LocalDateTime.now();
-    }
 
     @PrePersist
-    public void generarSerieYNumero() {
+    public void prePersist() {
+        calcularTotales();
+        generarSerieYNumero();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        calcularTotales();
+    }
+
+    private void calcularTotales() {
+        this.baseImponible = 0.0;
+        this.igv = 0.0;
+        this.total = 0.0;
+
+        if (detalle != null) {
+            for (VentaDetalle d : detalle) {
+                d.calcularMontos();
+                this.baseImponible += d.getBaseImponible();
+                this.igv += d.getIgv();
+                this.total += d.getTotal();
+            }
+        }
+    }
+
+    private void generarSerieYNumero() {
         if (this.serie == null) {
             this.serie = generarSerie();
         }
@@ -62,6 +81,7 @@ public class Venta {
             this.numero = generarNumero();
         }
     }
+
 
     private String generarSerie() {
         String letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -80,8 +100,11 @@ public class Venta {
         return String.format("%06d", numeroAleatorio);
     }
 
+    public Venta() {
+        this.fechaVenta = LocalDateTime.now();
+    }
 
-    public Venta(Integer id, String serie, String numero, String descripcion, Long clienteId, Cliente cliente, List<VentaDetalle> detalle, LocalDateTime fechaVenta, Double baseImponible, Double igv, Double total, FormaPago formaPago, String estado, Long formapagoId) {
+    public Venta(Integer id, String serie, String numero, String descripcion, Long clienteId, Cliente cliente, List<VentaDetalle> detalle, LocalDateTime fechaVenta, Double baseImponible, Double igv, Double total, FormaPago formaPago, Long formapagoId) {
         this.id = id;
         this.serie = serie;
         this.numero = numero;
@@ -94,7 +117,6 @@ public class Venta {
         this.igv = igv;
         this.total = total;
         this.formaPago = formaPago;
-        this.estado = estado;
         this.formapagoId = formapagoId;
     }
 
@@ -192,14 +214,6 @@ public class Venta {
 
     public void setFormaPago(FormaPago formaPago) {
         this.formaPago = formaPago;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
     }
 
     public Long getFormapagoId() {

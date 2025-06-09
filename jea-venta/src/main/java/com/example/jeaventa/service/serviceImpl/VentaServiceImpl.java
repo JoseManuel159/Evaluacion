@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,11 +36,36 @@ public class VentaServiceImpl implements VentaService {
     @Autowired
     private FormaPagoFeign formaPagoFeign;
 
+
+    private Venta cargarVentaCompleta(Venta venta) {
+        // Obtener y setear el cliente
+        Cliente cliente = clienteFeign.listarcliente(venta.getClienteId()).getBody();
+        venta.setCliente(cliente);
+
+        // Obtener y setear los productos de los detalles
+        List<VentaDetalle> detalles = venta.getDetalle().stream().map(detalle -> {
+            Producto producto = productoFeign.listarProducto(detalle.getProductoId()).getBody();
+            detalle.setProducto(producto);
+            return detalle;
+        }).collect(Collectors.toList());
+        venta.setDetalle(detalles);
+
+        // Obtener y setear la forma de pago
+        FormaPago formaPago = formaPagoFeign.obtenerFormaPago(venta.getFormapagoId()).getBody();
+        venta.setFormaPago(formaPago);
+
+        return venta;
+    }
+
+
     @Override
     public Venta createVenta(Venta venta) {
-        Venta nuevaVenta = ventaRepository.save(venta);
 
-        for (VentaDetalle detalle : nuevaVenta.getDetalle()) {
+        if (venta.getDescripcion() == null || venta.getDescripcion().trim().isEmpty()) {
+            venta.setDescripcion("Gracias por su compra");
+        }
+
+        for (VentaDetalle detalle : venta.getDetalle()) {
             Long productoId = detalle.getProductoId();
             Double cantidadVendida = detalle.getCantidad();
 
@@ -48,26 +74,32 @@ public class VentaServiceImpl implements VentaService {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 Producto producto = response.getBody();
 
-                // ✅ Verificar que el producto esté activo
                 if (!producto.isEstado()) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Producto con ID " + productoId + " no está activo.");
                 }
 
-                // ✅ Verificar que haya stock suficiente
                 if (producto.getCantidad() < cantidadVendida.intValue()) {
                     throw new RuntimeException("Stock insuficiente para el producto con ID " + productoId + ".");
                 }
 
-                // ✅ Restar la cantidad vendida del inventario
+                // Asignar precio correcto antes de guardar
+                detalle.setPrecio(producto.getPrecioVenta());
+
+                // Restar stock
                 int nuevaCantidad = producto.getCantidad() - cantidadVendida.intValue();
                 productoFeign.actualizarCantidad(productoId, nuevaCantidad);
+
             } else {
                 throw new RuntimeException("Producto con ID " + productoId + " no encontrado al registrar venta.");
             }
         }
 
+        // Ahora que los precios están asignados, la llamada a save dispara @PrePersist que calcula totales y serie/numero
+        Venta nuevaVenta = ventaRepository.save(venta);
+
         return nuevaVenta;
     }
+
 
     @Override
     public List<Venta> getAllVentas() {
@@ -105,4 +137,55 @@ public class VentaServiceImpl implements VentaService {
     public void deleteVenta(Integer id) {
         ventaRepository.deleteById(id);
     }
+
+
+
+    @Override
+    public List<Venta> buscarPorRangoFechas(LocalDateTime inicio, LocalDateTime fin) {
+        List<Venta> ventas = ventaRepository.findByFechaVentaBetween(inicio, fin);
+
+        return ventas.stream().map(venta -> {
+            // Cliente
+            Cliente cliente = clienteFeign.listarcliente(venta.getClienteId()).getBody();
+            venta.setCliente(cliente);
+
+            // Detalles con producto
+            List<VentaDetalle> detalles = venta.getDetalle().stream().map(detalle -> {
+                Producto producto = productoFeign.listarProducto(detalle.getProductoId()).getBody();
+                detalle.setProducto(producto);
+                return detalle;
+            }).collect(Collectors.toList());
+            venta.setDetalle(detalles);
+
+            // Forma de pago
+            FormaPago formaPago = formaPagoFeign.obtenerFormaPago(venta.getFormapagoId()).getBody();
+            venta.setFormaPago(formaPago);
+
+            return venta;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Venta> buscarPorSerie(String serie) {
+        return ventaRepository.findBySerie(serie)
+                .stream()
+                .map(this::cargarVentaCompleta)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Venta> buscarPorNumero(String numero) {
+        return ventaRepository.findByNumero(numero)
+                .stream()
+                .map(this::cargarVentaCompleta)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Venta> buscarPorSerieYNumero(String serie, String numero) {
+        return ventaRepository.findBySerieAndNumero(serie, numero)
+                .map(this::cargarVentaCompleta);
+    }
+
+
 }
