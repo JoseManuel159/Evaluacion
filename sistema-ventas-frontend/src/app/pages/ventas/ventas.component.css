@@ -1,0 +1,114 @@
+/* ventas.component.css */
+.ventas-container {
+  padding: 20px;
+  background-color: #f5f5ff;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cliente-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.contenido {
+  display: flex;
+  justify-content: space-between;
+}
+
+.catalogo {
+  width: 70%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 20px;
+}
+
+.producto-card {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.imagen-producto {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.canasta {
+  width: 28%;
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.item-canasta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cantidad-input {
+  width: 60px;
+}
+
+.pago-section button {
+  margin-right: 10px;
+}
+
+.resumen {
+  margin-top: 20px;
+  text-align: center;
+}
+.cliente-section {
+  padding: 15px;
+  border-radius: 12px;
+  background-color: #f0f4ff;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.buscador-cliente {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.datos-cliente {
+  padding: 10px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+}
+.tabla-canasta {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.tabla-canasta th, .tabla-canasta td {
+  padding: 8px;
+  text-align: center;
+}
+
+.cantidad-input {
+  width: 80px;
+}
+
+.total {
+  text-align: right;
+  margin-top: 1rem;
+}
+
+.forma-pago {
+  width: 100%;
+  margin-bottom: 1rem;
+}

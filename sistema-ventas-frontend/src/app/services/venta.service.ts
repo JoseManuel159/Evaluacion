@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {Cliente} from "../modelo/Cliente";
+import {Venta} from "../modelo/Venta";
 import {Observable} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
 })
-export class ClienteService {
-  private apiUrl = 'http://localhost:8085/cliente';
+export class VentaService {
+  private apiUrl = 'http://localhost:8085/venta';
 
   constructor(private http: HttpClient) {}
 
@@ -18,18 +18,21 @@ export class ClienteService {
     });
   }
 
-  listar(): Observable<Cliente[]> {
-    return this.http.get<Cliente[]>(this.apiUrl, {
+  registrarVenta(venta: Venta): Observable<any> {
+    return this.http.post<any>(this.apiUrl, venta, {
       headers: this.getHeaders()
     });
   }
 
-  // cliente.service.ts
-  obtenerPorDni(dni: string): Observable<Cliente> {
-    return this.http.get<Cliente>(`${this.apiUrl}/dni/${dni}`, {
+  listarVentas(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl, {
       headers: this.getHeaders()
     });
   }
 
-
+  obtenerVenta(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`, {
+      headers: this.getHeaders()
+    });
+  }
 }

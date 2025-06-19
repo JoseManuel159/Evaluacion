@@ -93,4 +93,12 @@ export class ProductoService {
     });
   }
 
+
+
+  buscarPorCodigo(codigo: string): Observable<Producto> {
+    return this.http.get<Producto>(`${this.apiUrl}/buscar/codigo/${codigo}`, {
+      headers: this.getHeaders()
+    });
+  }
+
 }

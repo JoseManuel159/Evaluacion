@@ -1,1 +1,147 @@
-<p>ventas works!</p>
+<!-- ventas.component.html -->
+<div class="ventas-container mat-elevation-z2">
+
+  <!-- 🧑 Buscar o Registrar Cliente -->
+  <div class="cliente-section mat-elevation-z2">
+
+    <!-- 🔍 Buscador -->
+    <div class="buscador-cliente">
+      <mat-form-field appearance="outline">
+        <mat-label>Buscar DNI</mat-label>
+        <input matInput [(ngModel)]="dniCliente" placeholder="Ingrese DNI" />
+        <button mat-icon-button matSuffix (click)="buscarCliente()">
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <!-- ➕ Botón para insertar cliente manualmente -->
+      <button mat-raised-button color="accent" (click)="abrirDialogoAgregarCliente()">
+        Agregar Cliente
+      </button>
+    </div>
+
+    <!-- 📋 Mostrar datos del cliente -->
+    <div class="datos-cliente" *ngIf="clienteSeleccionado">
+      <h4>Datos del Cliente</h4>
+      <p><strong>Nombre:</strong> {{ clienteSeleccionado.nombre }} {{ clienteSeleccionado.apellido }}</p>
+      <p><strong>Dirección:</strong> {{ clienteSeleccionado.direccion }}</p>
+      <p><strong>Teléfono:</strong> {{ clienteSeleccionado.telefono }}</p>
+      <p><strong>Email:</strong> {{ clienteSeleccionado.email }}</p>
+    </div>
+
+  </div>
+
+
+  <div class="contenido">
+
+    <!-- 🛍️ Catálogo de Productos -->
+    <div class="catalogo">
+      <div class="filtros" style="display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center;">
+        <!-- Buscar por código -->
+        <mat-form-field appearance="outline" style="flex: 1;">
+          <mat-label>Buscar por Código</mat-label>
+          <input matInput [(ngModel)]="codigoBusqueda" (keyup.enter)="buscarPorCodigo()" placeholder="Ej: P123" />
+          <button mat-icon-button matSuffix (click)="buscarPorCodigo()">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <!-- Filtrar por categoría -->
+        <mat-form-field appearance="outline" style="flex: 1;">
+          <mat-label>Filtrar por Categoría</mat-label>
+          <mat-select [(ngModel)]="categoriaSeleccionada" (selectionChange)="filtrarPorCategoria()">
+            <mat-option *ngFor="let cat of categorias" [value]="cat.id">
+              {{ cat.nombre }}
+            </mat-option>
+            <mat-option [value]="null">Todas</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Catálogo de productos -->
+      <div class="catalogo">
+        <div *ngFor="let producto of productosFiltrados" class="producto-card mat-elevation-z4">
+          <img [src]="producto.urlImagen || 'assets/default.png'" alt="producto" class="imagen-producto" />
+          <h4>{{ producto.nombre }}</h4>
+          <p><strong>Código:</strong> {{ producto.codigo }}</p>
+          <p><strong>Descripción:</strong> {{ producto.descripcion }}</p>
+          <p><strong>Categoría:</strong> {{ producto.categoria.nombre }}</p>
+          <p><strong>Precio:</strong> S/. {{ producto.precioVenta }}</p>
+          <p><strong>Stock:</strong> {{ producto.cantidad }}</p>
+          <button mat-raised-button color="primary" (click)="agregarACanasta(producto)">
+            Añadir al carrito
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🛒 Canasta de Compra + Pago -->
+    <div class="canasta">
+      <h3>Cesta de la compra ({{ canasta.length }})</h3>
+
+      <div *ngIf="canasta.length > 0; else vacia">
+        <table class="tabla-canasta mat-elevation-z2">
+          <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Precio Unitario</th>
+            <th>Cantidad</th>
+            <th>Subtotal</th>
+            <th>Acción</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let item of canasta">
+            <td>{{ item.producto?.nombre }}</td>
+            <td>S/. {{ item.producto?.precioVenta?.toFixed(2) }}</td>
+            <td>
+              <mat-form-field appearance="fill" class="cantidad-input">
+                <input
+                  matInput
+                  type="number"
+                  [(ngModel)]="item.cantidad"
+                  min="1"
+                  (ngModelChange)="actualizarCanasta()"
+                />
+              </mat-form-field>
+            </td>
+            <td>
+              S/. {{ (item.producto?.precioVenta || 0) * item.cantidad | number:'1.2-2' }}
+            </td>
+            <td>
+              <button mat-icon-button color="warn" (click)="eliminarItem(item)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+
+        <div class="total">
+          <h4>Total a pagar: <strong>S/. {{ totalPagar.toFixed(2) }}</strong></h4>
+        </div>
+
+        <!-- Forma de pago -->
+        <mat-form-field appearance="fill" class="forma-pago">
+          <mat-label>Forma de Pago</mat-label>
+          <mat-select [(ngModel)]="formapagoId">
+            <mat-option [value]="1">Efectivo</mat-option>
+            <mat-option [value]="2">Yape</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" (click)="generarVenta()">
+          Confirmar Venta
+        </button>
+      </div>
+
+      <!-- Mensaje cuando no hay productos -->
+      <ng-template #vacia>
+        <p>No hay productos en la canasta.</p>
+      </ng-template>
+    </div>
+
+
+
+  </div>
+</div>

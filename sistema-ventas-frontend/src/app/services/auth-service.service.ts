@@ -3,13 +3,13 @@ import {HttpClient} from "@angular/common/http";
 import {LoginRequest} from "../modelo/LoginRequest";
 import {Observable} from "rxjs";
 import {LoginResponse} from "../modelo/LoginResponse";
+import {environment} from "../../environments/environment.development";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-
-  private authUrl = 'http://localhost:8085/auth/login';
+  private authUrl = `${environment.HOST}/auth/login`;
 
   constructor(private http: HttpClient) {}
 
