@@ -16,6 +16,8 @@ import {CategoriaService} from "../../services/categoria.service";
 import {DetalleVenta} from "../../modelo/DetalleVenta";
 import {VentaService} from "../../services/venta.service";
 import {CanastaService} from "../../services/canasta.service";
+import {ItemCanasta} from "../../modelo/ItemCanasta";
+import {Venta} from "../../modelo/Venta";
 
 @Component({
   selector: 'app-ventas',
@@ -46,152 +48,160 @@ import {CanastaService} from "../../services/canasta.service";
 // reemplaza tu VentasComponent por este
 export class VentasComponent implements OnInit {
   dniCliente: string = '';
-  clienteSeleccionado: Cliente | null = null;
+  clienteEncontrado: Cliente | null = null;
   productos: Producto[] = [];
   productosFiltrados: Producto[] = [];
   categorias: Categoria[] = [];
-  codigoBusqueda: string = '';
-  categoriaSeleccionada: number | null = null;
-  canasta: DetalleVenta[] = [];
-  formapagoId: number = 1; // Por defecto efectivo
+  terminoBusqueda: string = '';
+  categoriaSeleccionada: Categoria | null = null;
+  items: ItemCanasta[] = [];
+  total: number = 0;
+  metodoPago: number = 0;
+  menuCategoriasAbierto = false;
 
 
-  constructor(
-    private clienteService: ClienteService,
-    private dialog: MatDialog,
-    private productoService: ProductoService,
-    private categoriaService: CategoriaService,
-    private canastaService: CanastaService,
-    private ventaService: VentaService
-  ) {}
+
+  constructor(private clienteService: ClienteService,
+              private productoService: ProductoService,
+              private categoriaService: CategoriaService,
+              private canastaService: CanastaService,
+              private ventaService: VentaService) {}
 
   ngOnInit(): void {
-    this.cargarProductos();
-    this.cargarCategorias();
-    this.actualizarCanasta();
-  }
+    this.listarCategorias();
+    this.listarProductos();
+    this.canastaService.items$.subscribe((data) => {
+      this.items = data;
+    });
 
-  actualizarCanasta(): void {
-    this.canasta = this.canastaService.getCanasta();
+    this.canastaService.getTotal().subscribe((total) => {
+      this.total = total;
+    });
   }
-
-  eliminarItem(item: DetalleVenta): void {
-    this.canastaService.eliminarProducto(item.productoId);
-    this.actualizarCanasta();
-  }
-
-  get totalPagar(): number {
-    return this.canastaService.getTotal();
-  }
-
-  generarVenta(): void {
-    if (!this.clienteSeleccionado) {
-      alert("Debe seleccionar un cliente para continuar.");
+  buscarCliente(): void {
+    if (!this.dniCliente.trim()) {
+      alert('Ingrese un DNI válido.');
       return;
     }
 
-    if (this.canasta.length === 0) {
-      alert("No hay productos en la canasta.");
+    this.clienteService.obtenerPorDni(this.dniCliente).subscribe({
+      next: (cliente) => {
+        this.clienteEncontrado = cliente;
+      },
+      error: () => {
+        alert('Cliente no encontrado.');
+        this.clienteEncontrado = null;
+      }
+    });
+  }
+
+  listarProductos(): void {
+    this.productoService.listar().subscribe((data) => {
+      this.productos = data;
+      this.filtrarProductos(); // mostrar todos al inicio
+    });
+  }
+
+  listarCategorias(): void {
+    this.categoriaService.listar().subscribe((data) => {
+      this.categorias = data;
+    });
+  }
+
+  filtrarProductos(): void {
+    const termino = this.terminoBusqueda.toLowerCase().trim();
+
+    this.productosFiltrados = this.productos.filter(p => {
+      const coincideTexto = p.nombre.toLowerCase().includes(termino) || p.codigo.toLowerCase().includes(termino);
+      const coincideCategoria = !this.categoriaSeleccionada || p.categoria.id === this.categoriaSeleccionada.id;
+      return coincideTexto && coincideCategoria;
+    });
+  }
+
+  filtrarPorCategoria(categoria: Categoria | null): void {
+    this.categoriaSeleccionada = categoria;
+    this.filtrarProductos();
+    this.menuCategoriasAbierto = false; // 👈 cerrar menú
+  }
+
+
+  agregarACanasta(producto: Producto): void {
+    if (producto.cantidad <= 0) {
+      alert('Este producto no tiene stock disponible.');
+      return;
+    }
+    this.canastaService.agregar(producto);
+  }
+
+
+  seleccionarMetodoPago(id: number) {
+    this.metodoPago = id;
+  }
+
+  aumentarCantidad(producto: Producto) {
+    const itemEnCanasta = this.items.find(i => i.producto.id === producto.id);
+    const cantidadActual = itemEnCanasta?.cantidad || 0;
+
+    if (cantidadActual >= producto.cantidad) {
+      alert('No puedes agregar más de la cantidad disponible en stock');
       return;
     }
 
-    const detalle = this.canasta.map(item => ({
-      productoId: item.productoId,
-      cantidad: item.cantidad
+    this.canastaService.agregar(producto);
+  }
+
+
+  disminuirCantidad(producto: Producto) {
+    this.canastaService.quitar(producto);
+  }
+
+  eliminarItem(producto: Producto) {
+    this.canastaService.eliminar(producto);
+  }
+
+  registrarVenta() {
+    if (!this.clienteEncontrado) {
+      alert('Debe seleccionar un cliente');
+      return;
+    }
+
+    if (this.metodoPago === 0) {
+      alert('Debe seleccionar un método de pago');
+      return;
+    }
+
+    if (this.items.length === 0) {
+      alert('Debe agregar al menos un producto a la canasta');
+      return;
+    }
+
+    const detalle: DetalleVenta[] = this.items.map((item) => ({
+      productoId: item.producto.id,
+      cantidad: item.cantidad,
+      nombreProducto: item.producto.nombre,
+      precioUnitario: item.producto.precioVenta
     }));
 
-    const venta = {
-      clienteId: this.clienteSeleccionado.id,
-      detalle: detalle,
-      formapagoId: this.formapagoId
+    const venta: Venta = {
+      clienteId: this.clienteEncontrado.id,
+      formapagoId: this.metodoPago,
+      detalle
     };
 
     this.ventaService.registrarVenta(venta).subscribe({
       next: () => {
         alert('Venta registrada con éxito');
-        this.canastaService.vaciarCanasta();
-        this.actualizarCanasta();
-        this.clienteSeleccionado = null;
-        this.dniCliente = '';
+        this.canastaService.vaciar();
+        this.metodoPago = 0;
       },
-      error: (err) => {
-        console.error(err);
-        alert('Error al registrar venta');
-      }
+      error: () => alert('Error al registrar la venta')
     });
   }
 
-  buscarCliente() {
-    if (!this.dniCliente) return;
-
-    this.clienteService.obtenerPorDni(this.dniCliente).subscribe({
-      next: (cliente) => {
-        this.clienteSeleccionado = cliente;
-      },
-      error: () => {
-        this.clienteSeleccionado = null;
-        alert("Cliente no encontrado. Puedes agregarlo.");
-      }
-    });
+  imagenError(event: Event) {
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.src = 'https://via.placeholder.com/150'; // Imagen de respaldo
   }
 
-  abrirDialogoAgregarCliente() {
-    // Aquí puedes abrir un diálogo con un formulario para agregar un nuevo cliente.
-  }
-
-  cargarProductos(): void {
-    this.productoService.listar().subscribe(productos => {
-      this.productos = productos;
-      this.productosFiltrados = productos;
-    });
-  }
-
-  cargarCategorias(): void {
-    this.categoriaService.listar().subscribe(categorias => {
-      this.categorias = categorias;
-    });
-  }
-
-  buscarPorCodigo(): void {
-    if (!this.codigoBusqueda) return;
-
-    this.productoService.buscarPorCodigo(this.codigoBusqueda).subscribe({
-      next: producto => {
-        this.productosFiltrados = [producto];
-      },
-      error: () => {
-        this.productosFiltrados = [];
-      }
-    });
-  }
-
-  filtrarPorCategoria(): void {
-    if (!this.categoriaSeleccionada) {
-      this.productosFiltrados = [...this.productos];
-    } else {
-      this.productosFiltrados = this.productos.filter(p => p.categoria.id === this.categoriaSeleccionada);
-    }
-  }
-
-  agregarACanasta(producto: Producto): void {
-    if (producto.id == null) {
-      console.error('El producto no tiene ID. No se puede agregar a la canasta.');
-      return;
-    }
-
-    const yaExiste = this.canasta.find(item => item.productoId === producto.id);
-
-    if (yaExiste) {
-      yaExiste.cantidad += 1;
-    } else {
-      this.canastaService.agregarProducto({
-        productoId: producto.id,
-        cantidad: 1,
-        producto: producto
-      });
-    }
-
-    this.actualizarCanasta();
-  }
 
 }

@@ -1,15 +1,12 @@
 <!-- productos.component.html -->
 <div class="p-4">
   <h2 class="text-xl font-bold mb-4">Listado de Productos</h2>
-
   <table mat-table [dataSource]="productos" class="mat-elevation-z2 w-full">
-
     <!-- ID -->
     <ng-container matColumnDef="id">
       <th mat-header-cell *matHeaderCellDef> ID </th>
       <td mat-cell *matCellDef="let producto"> {{ producto.id }} </td>
     </ng-container>
-
     <!-- Código -->
     <ng-container matColumnDef="codigo">
       <th mat-header-cell *matHeaderCellDef> Código </th>

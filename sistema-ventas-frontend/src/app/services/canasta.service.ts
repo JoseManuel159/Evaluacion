@@ -1,34 +1,64 @@
 import { Injectable } from '@angular/core';
-import {DetalleVenta} from "../modelo/DetalleVenta";
+import {ItemCanasta} from "../modelo/ItemCanasta";
+import {BehaviorSubject, map ,Observable} from "rxjs";
+import {Producto} from "../modelo/Producto";
 
 @Injectable({
   providedIn: 'root'
 })
 export class CanastaService {
-  private canasta: DetalleVenta[] = [];
+  private items: ItemCanasta[] = [];
+  private itemsSubject = new BehaviorSubject<ItemCanasta[]>([]);
 
-  getCanasta(): DetalleVenta[] {
-    return this.canasta;
+  items$ = this.itemsSubject.asObservable();
+
+  agregar(producto: Producto) {
+    const item = this.items.find(i => i.producto.id === producto.id);
+    if (item) {
+      item.cantidad++;
+    } else {
+      this.items.push({ producto, cantidad: 1 });
+    }
+    this.itemsSubject.next(this.items);
   }
 
-  agregarProducto(item: DetalleVenta): void {
-    const existe = this.canasta.find(i => i.productoId === item.productoId);
-    if (existe) {
-      existe.cantidad += item.cantidad;
-    } else {
-      this.canasta.push(item);
+  quitar(producto: Producto) {
+    const item = this.items.find(i => i.producto.id === producto.id);
+    if (item) {
+      item.cantidad--;
+      if (item.cantidad <= 0) {
+        this.items = this.items.filter(i => i.producto.id !== producto.id);
+      }
+      this.itemsSubject.next(this.items);
     }
   }
 
-  eliminarProducto(productoId: number): void {
-    this.canasta = this.canasta.filter(i => i.productoId !== productoId);
+  eliminar(producto: Producto) {
+    this.items = this.items.filter(i => i.producto.id !== producto.id);
+    this.itemsSubject.next(this.items);
   }
 
-  vaciarCanasta(): void {
-    this.canasta = [];
+  getTotal(): Observable<number> {
+    return this.items$.pipe(
+      map((items) =>
+        items.reduce((total, item) => total + item.producto.precioVenta * item.cantidad, 0)
+      )
+    );
   }
 
-  getTotal(): number {
-    return this.canasta.reduce((total, item) => total + (item.producto?.precioVenta || 0) * item.cantidad, 0);
+  vaciar() {
+    this.items = []; // ← Limpia también el arreglo real
+    this.itemsSubject.next([]);
   }
+
+  agregarConCantidad(producto: Producto, cantidad: number): void {
+    const item = this.items.find(i => i.producto.id === producto.id);
+    if (item) {
+      item.cantidad += cantidad;
+    } else {
+      this.items.push({ producto, cantidad });
+    }
+    this.itemsSubject.next(this.items);
+  }
+
 }

@@ -1,17 +1,16 @@
 import {Categoria} from "./Categoria";
 
 export interface Producto {
-  id?: number;
+  id: number;
   codigo: string;
   nombre: string;
-  descripcion?: string;
-  cantidad?: number;
-  precioVenta?: number;
-  costoCompra?: number;
-  estado?: boolean;
-  fechaCreacion?: string;
-  fechaActualizacion?: string;
+  descripcion: string;
+  cantidad: number;
+  precioVenta: number;
+  costoCompra: number;
+  estado: boolean;
+  fechaCreacion: string;
+  fechaActualizacion: string;
   categoria: Categoria;
-  imagen?: string; // o el nombre del atributo real
-  urlImagen?: string; // <- este se usará solo en el frontend
+  imagen: string; // o el nombre del atributo real
 }
