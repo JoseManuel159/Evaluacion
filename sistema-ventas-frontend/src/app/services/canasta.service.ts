@@ -51,15 +51,6 @@ export class CanastaService {
     this.itemsSubject.next([]);
   }
 
-  agregarConCantidad(producto: Producto, cantidad: number): void {
-    const item = this.items.find(i => i.producto.id === producto.id);
-    if (item) {
-      item.cantidad += cantidad;
-    } else {
-      this.items.push({ producto, cantidad });
-    }
-    this.itemsSubject.next(this.items);
-  }
 
 
   obtenerCantidadPorProducto(productoId: number): number {
