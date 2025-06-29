@@ -1,6 +1,7 @@
 package com.example.jeaauth.controller;
 
 import com.example.jeaauth.dto.UsuarioDto;
+import com.example.jeaauth.dto.UsuarioListadoDto;
 import com.example.jeaauth.dto.UsuarioRolDto;
 import com.example.jeaauth.entity.Usuario;
 import com.example.jeaauth.repository.UsuarioRepository;
@@ -52,9 +53,16 @@ public class UsuarioController {
     }
 
     @GetMapping("/estado")
-    public ResponseEntity<List<Usuario>> listarUsuariosPorEstado(@RequestParam boolean estado) {
-        List<Usuario> usuarios = usuarioService.listarPorEstado(estado);
+    public ResponseEntity<List<UsuarioListadoDto>> listarUsuariosPorEstado(@RequestParam boolean estado) {
+        List<UsuarioListadoDto> usuarios = usuarioService.listarUsuariosPorEstadoConRol(estado);
         return ResponseEntity.ok(usuarios);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable Long id, @RequestBody UsuarioDto dto) {
+        Usuario usuarioActualizado = usuarioService.actualizar(id, dto);
+        return ResponseEntity.ok(usuarioActualizado);
+    }
+
 
 }

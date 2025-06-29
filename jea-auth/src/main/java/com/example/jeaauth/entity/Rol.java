@@ -9,7 +9,7 @@ import javax.persistence.*;
 public class Rol {
 
     public enum RolNombre {
-        ADMIN, USER, DBA
+        ADMIN, USER, ALMACENERO
     }
 
     @Id

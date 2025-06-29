@@ -2,6 +2,7 @@ package com.example.jeaauth.service.serviceImpl;
 
 import com.example.jeaauth.dto.AccesoDto;
 import com.example.jeaauth.dto.UsuarioDto;
+import com.example.jeaauth.dto.UsuarioListadoDto;
 import com.example.jeaauth.dto.UsuarioRolDto;
 import com.example.jeaauth.entity.*;
 import com.example.jeaauth.repository.*;
@@ -135,6 +136,99 @@ public class UsuarioServiceImpl implements UsuarioService {
     public List<Usuario> listarPorEstado(boolean estado) {
         return usuarioRepository.findByEstado(estado);
     }
+
+    @Override
+    public List<UsuarioListadoDto> listarUsuariosPorEstadoConRol(boolean estado) {
+        List<Usuario> usuarios = usuarioRepository.findByEstado(estado);
+        List<UsuarioListadoDto> resultado = new ArrayList<>();
+
+        for (Usuario usuario : usuarios) {
+            String userName = usuario.getAuthUser() != null ? usuario.getAuthUser().getUserName() : null;
+
+            List<UsuarioRol> roles = usuarioRolRepository.findByUsuario(usuario);
+            String nombreRol = roles.isEmpty() ? "SIN ROL" : roles.get(0).getRol().getNombre().name(); // asumes un rol
+
+            UsuarioListadoDto dto = new UsuarioListadoDto(
+                    usuario.getId(),
+                    usuario.getNombres(),
+                    usuario.getApellidoPaterno(),
+                    usuario.getApellidoMaterno(),
+                    usuario.getDni(),
+                    usuario.getDireccion(),
+                    usuario.getTelefono(),
+                    usuario.getEstado(),
+                    userName,
+                    nombreRol
+            );
+
+            resultado.add(dto);
+        }
+
+        return resultado;
+    }
+
+    @Override
+    public Usuario actualizar(Long id, UsuarioDto dto) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // Actualizar datos básicos (sin userName ni password)
+        usuario.setNombres(dto.getNombres());
+        usuario.setApellidoPaterno(dto.getApellidoPaterno());
+        usuario.setApellidoMaterno(dto.getApellidoMaterno());
+        usuario.setDni(dto.getDni());
+        usuario.setDireccion(dto.getDireccion());
+        usuario.setTelefono(dto.getTelefono());
+        usuario.setEstado(dto.getEstado());
+
+        usuario = usuarioRepository.save(usuario);
+
+        // 🔁 Actualizar el rol si cambió
+        if (dto.getRolId() != null) {
+            List<UsuarioRol> rolesActuales = usuarioRolRepository.findByUsuario(usuario);
+
+            // Si ya tiene un rol asignado
+            if (!rolesActuales.isEmpty()) {
+                UsuarioRol actual = rolesActuales.get(0); // Solo uno porque tú decidiste que un usuario tiene 1 rol
+                if (!actual.getRol().getIdRol().equals(dto.getRolId())) {
+                    // Cambiar a nuevo rol
+                    Rol nuevoRol = rolRepository.findById(dto.getRolId())
+                            .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+                    UsuarioRolPK nuevaPK = new UsuarioRolPK();
+                    nuevaPK.setUsuarioId(usuario.getId());
+                    nuevaPK.setRolId(nuevoRol.getIdRol());
+
+                    UsuarioRol nuevoUsuarioRol = new UsuarioRol();
+                    nuevoUsuarioRol.setId(nuevaPK);
+                    nuevoUsuarioRol.setUsuario(usuario);
+                    nuevoUsuarioRol.setRol(nuevoRol);
+
+                    // Eliminar el anterior y guardar el nuevo
+                    usuarioRolRepository.delete(actual);
+                    usuarioRolRepository.save(nuevoUsuarioRol);
+                }
+            } else {
+                // Si no tiene ningún rol aún, asignarlo
+                Rol nuevoRol = rolRepository.findById(dto.getRolId())
+                        .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+                UsuarioRolPK pk = new UsuarioRolPK();
+                pk.setUsuarioId(usuario.getId());
+                pk.setRolId(nuevoRol.getIdRol());
+
+                UsuarioRol nuevoUsuarioRol = new UsuarioRol();
+                nuevoUsuarioRol.setId(pk);
+                nuevoUsuarioRol.setUsuario(usuario);
+                nuevoUsuarioRol.setRol(nuevoRol);
+
+                usuarioRolRepository.save(nuevoUsuarioRol);
+            }
+        }
+
+        return usuario;
+    }
+
 
 
 }
