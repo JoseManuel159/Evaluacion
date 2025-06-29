@@ -10,5 +10,4 @@ export interface UsuarioListado {
   userName: string;
   rol: string;
   rolId: number;    // id del rol (ej. 1, 2, 3)
-
 }

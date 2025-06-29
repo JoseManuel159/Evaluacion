@@ -19,7 +19,8 @@ import {MatFormField, MatFormFieldModule} from "@angular/material/form-field";
 import {FormsModule} from "@angular/forms";
 import {MatInput} from "@angular/material/input";
 import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from "@angular/material/datepicker";
-import {MatNativeDateModule} from "@angular/material/core";
+import {MatNativeDateModule, MatOption} from "@angular/material/core";
+import {MatSelect} from "@angular/material/select";
 
 @Component({
   selector: 'app-lista-ventas',
@@ -51,7 +52,10 @@ import {MatNativeDateModule} from "@angular/material/core";
     MatDatepickerInput,
     MatButton,
     MatFormFieldModule,
-    MatNativeDateModule, // Este incluye el adaptador
+    MatNativeDateModule,
+    MatSelect,
+    MatOption,
+    // Este incluye el adaptador
 
   ],
   templateUrl: './lista-ventas.component.html',
@@ -61,10 +65,27 @@ export class ListaVentasComponent implements OnInit {
   ventas: any[] = [];
   dataSource = new MatTableDataSource<any>();
   displayedColumns: string[] = ['fecha', 'codigo', 'total', 'pdf'];
-  filtroSerie: string = '';
-  filtroNumero: string = '';
-  filtroFechaInicio: Date | null = null;
-  filtroFechaFin: Date | null = null;
+  filtroCodigo: string = '';
+
+  // ListaVentasComponent.ts
+  meses = [
+    { nombre: 'Enero', valor: 0 },
+    { nombre: 'Febrero', valor: 1 },
+    { nombre: 'Marzo', valor: 2 },
+    { nombre: 'Abril', valor: 3 },
+    { nombre: 'Mayo', valor: 4 },
+    { nombre: 'Junio', valor: 5 },
+    { nombre: 'Julio', valor: 6 },
+    { nombre: 'Agosto', valor: 7 },
+    { nombre: 'Septiembre', valor: 8 },
+    { nombre: 'Octubre', valor: 9 },
+    { nombre: 'Noviembre', valor: 10 },
+    { nombre: 'Diciembre', valor: 11 }
+  ];
+
+  anioActual = new Date().getFullYear(); // puedes permitir cambiarlo también si deseas
+  mesSeleccionado: number | null = null;
+
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -92,32 +113,41 @@ export class ListaVentasComponent implements OnInit {
     });
   }
 
-  buscarSerie(): void {
-    if (!this.filtroSerie.trim()) return;
-    this.ventaService.buscarPorSerie(this.filtroSerie.trim()).subscribe({
-      next: (data) => this.dataSource.data = data,
-      error: () => alert('No se encontraron ventas por esa serie')
-    });
-  }
+  buscarPorMes(): void {
+    if (this.mesSeleccionado === null) return;
 
-  buscarNumero(): void {
-    if (!this.filtroNumero.trim()) return;
-    this.ventaService.buscarPorNumero(this.filtroNumero.trim()).subscribe({
-      next: (data) => this.dataSource.data = data,
-      error: () => alert('No se encontraron ventas por ese número')
-    });
-  }
+    const inicio = new Date(this.anioActual, this.mesSeleccionado, 1, 0, 0, 0);
+    const fin = new Date(this.anioActual, this.mesSeleccionado + 1, 0, 23, 59, 59); // día 0 del mes siguiente = último del actual
 
-  buscarPorFechas(): void {
-    if (!this.filtroFechaInicio || !this.filtroFechaFin) return;
-
-    const inicioISO = new Date(this.filtroFechaInicio).toISOString();
-    const finISO = new Date(this.filtroFechaFin).toISOString();
+    const inicioISO = inicio.toISOString();
+    const finISO = fin.toISOString();
 
     this.ventaService.buscarPorFechas(inicioISO, finISO).subscribe({
       next: (data) => this.dataSource.data = data,
-      error: () => alert('No se encontraron ventas en ese rango')
+      error: () => alert('No se encontraron ventas en ese mes')
     });
+  }
+
+
+  buscarCodigo(): void {
+    const codigo = this.filtroCodigo.trim();
+
+    if (!codigo) return;
+
+    // Si es puramente numérico, buscar por número
+    if (/^\d+$/.test(codigo)) {
+      this.ventaService.buscarPorNumero(codigo).subscribe({
+        next: (data) => this.dataSource.data = data,
+        error: () => alert('No se encontraron ventas con ese número')
+      });
+    }
+    // Si contiene letras (como "B001"), buscar por serie
+    else {
+      this.ventaService.buscarPorSerie(codigo).subscribe({
+        next: (data) => this.dataSource.data = data,
+        error: () => alert('No se encontraron ventas con esa serie')
+      });
+    }
   }
 
 

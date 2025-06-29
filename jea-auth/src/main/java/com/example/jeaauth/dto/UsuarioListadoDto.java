@@ -13,7 +13,7 @@ public class UsuarioListadoDto {
     private String telefono;
     private Boolean estado;
     private String userName;
-    private String rol; // ✅ nombre del rol (ej: ADMIN, USER)
+    private String rol;
 
     public UsuarioListadoDto(Long id, String nombres, String apellidoPaterno, String apellidoMaterno, String dni, String direccion, String telefono, Boolean estado, String userName, String rol) {
         this.id = id;
