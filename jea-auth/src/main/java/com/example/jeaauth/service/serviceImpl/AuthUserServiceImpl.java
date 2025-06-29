@@ -66,8 +66,6 @@ public class AuthUserServiceImpl implements AuthUserService {
             return null;
         }
 
-        String token = jwtProvider.createToken(user);
-
         // Buscar Usuario asociado al AuthUser
         Optional<Usuario> usuarioOpt = usuarioRepository.findByAuthUser(user);
         if (!usuarioOpt.isPresent()) {
@@ -75,6 +73,15 @@ public class AuthUserServiceImpl implements AuthUserService {
         }
 
         Usuario usuario = usuarioOpt.get();
+
+        // 🔴 Aquí va la validación del estado
+        if (usuario.getEstado() != null && !usuario.getEstado()) {
+            // Usuario está inactivo
+            return null; // o lanzar una excepción personalizada si prefieres
+        }
+
+        // Generar token
+        String token = jwtProvider.createToken(user);
 
         // Obtener roles del usuario
         List<UsuarioRol> usuarioRoles = usuarioRolRepository.findByUsuario(usuario);
@@ -90,7 +97,7 @@ public class AuthUserServiceImpl implements AuthUserService {
 
         // Convertir a AccesoDto
         List<AccesoDto> accesoDtos = accesos.stream()
-                .map(a -> new AccesoDto(a.getNombre(), a.getUrl(), a.getIcono()))
+                .map(a -> new AccesoDto(a.getNombre(), a.getUrl(), a.getIcono(), a.getOrden()))
                 .collect(Collectors.toList());
 
         return new AuthResponseDto(token, user.getUserName(), accesoDtos);

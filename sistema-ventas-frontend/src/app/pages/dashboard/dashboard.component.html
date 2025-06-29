@@ -1,1 +1,37 @@
-<p>dashboard works!</p>
+<div class="dashboard-container">
+  <!-- ENCABEZADO -->
+  <header class="dashboard-header">
+    <img src="assets/logo.png" alt="Logo Tienda" class="logo" />
+    <h1>Tienda Electrónica SmartTech</h1>
+    <p class="subtitle">Panel de análisis de ventas</p>
+  </header>
+
+  <!-- CUADRO RESUMEN -->
+  <div class="summary-box">
+    💰 <strong>Total Vendido:</strong> S/ {{ totalVentas | number: '1.2-2' }}
+  </div>
+
+  <!-- GRÁFICOS -->
+  <div class="charts-grid">
+    <!-- Gráfico Circular -->
+    <div class="chart-card">
+      <canvas baseChart
+              [data]="{
+                labels: pieChartLabels,
+                datasets: [{ data: pieChartData }]
+              }"
+              [type]="pieChartType"
+              [options]="chartOptions">
+      </canvas>
+    </div>
+
+    <!-- Gráfico de Barras -->
+    <div class="chart-card">
+      <canvas baseChart
+              [data]="barChartData"
+              [type]="barChartType"
+              [legend]="true">
+      </canvas>
+    </div>
+  </div>
+</div>

@@ -20,14 +20,17 @@ public class Acceso {
     @Column(name = "icono", nullable = false, length = 60)
     private String icono;
 
+    private Long orden;
+
     public Acceso() {
     }
 
-    public Acceso(Long idAcceso, String nombre, String url, String icono) {
+    public Acceso(Long idAcceso, String nombre, String url, String icono, Long orden) {
         this.idAcceso = idAcceso;
         this.nombre = nombre;
         this.url = url;
         this.icono = icono;
+        this.orden = orden;
     }
 
     public Long getIdAcceso() {
@@ -62,4 +65,12 @@ public class Acceso {
         this.icono = icono;
     }
 
+
+    public Long getOrden() {
+        return orden;
+    }
+
+    public void setOrden(Long orden) {
+        this.orden = orden;
+    }
 }

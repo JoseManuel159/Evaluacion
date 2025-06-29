@@ -22,10 +22,10 @@ export class HomeLayoutComponent {
   constructor(private router: Router) {
     const accesosData = localStorage.getItem('accesos');
     this.accesos = accesosData ? JSON.parse(accesosData) : [];
-    localStorage.getItem('accesos')
 
+    // 🟡 Ordenar por el campo 'orden' si existe
+    this.accesos.sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
   }
-
 
   logout() {
     localStorage.clear();

@@ -24,7 +24,7 @@ public class AccesoServiceImpl implements AccesoService {
     public List<AccesoDto> obtenerAccesosDeUsuario(String username) {
         List<Acceso> accesos = accesoRepository.findAccesosByUsername(username);
         return accesos.stream()
-                .map(a -> new AccesoDto(a.getNombre(), a.getUrl(), a.getIcono()))
+                .map(a -> new AccesoDto(a.getNombre(), a.getUrl(), a.getIcono(), a.getOrden()))
                 .collect(Collectors.toList());
     }
 

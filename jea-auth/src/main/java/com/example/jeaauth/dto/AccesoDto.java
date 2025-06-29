@@ -6,14 +6,17 @@ public class AccesoDto {
     private String nombre;
     private String url;
     private String icono;
+    private Long orden;
+
 
     public AccesoDto() {
     }
 
-    public AccesoDto(String nombre, String url, String icono) {
+    public AccesoDto(String nombre, String url, String icono, Long orden) {
         this.nombre = nombre;
         this.url = url;
         this.icono = icono;
+        this.orden = orden;
     }
 
 
@@ -39,5 +42,13 @@ public class AccesoDto {
 
     public void setIcono(String icono) {
         this.icono = icono;
+    }
+
+    public Long getOrden() {
+        return orden;
+    }
+
+    public void setOrden(Long orden) {
+        this.orden = orden;
     }
 }

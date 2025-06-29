@@ -126,12 +126,18 @@ export class VentasComponent implements OnInit {
 
 
   agregarACanasta(producto: Producto): void {
-    if (producto.cantidad <= 0) {
-      alert('Este producto no tiene stock disponible.');
+    const cantidadActual = this.canastaService.obtenerCantidadPorProducto(producto.id);
+
+    if (cantidadActual >= producto.cantidad) {
+      alert(`Ya no hay más stock disponible de "${producto.nombre}".`);
       return;
     }
+
     this.canastaService.agregar(producto);
+    // 🔻 Disminuye visualmente el stock
+    producto.cantidad--;
   }
+
 
 
   seleccionarMetodoPago(id: number) {
@@ -148,15 +154,27 @@ export class VentasComponent implements OnInit {
     }
 
     this.canastaService.agregar(producto);
+
+    // 🔻 Disminuye visualmente el stock
+    const prodVisual = this.productosFiltrados.find(p => p.id === producto.id);
+    if (prodVisual) prodVisual.cantidad--;
   }
 
 
   disminuirCantidad(producto: Producto) {
     this.canastaService.quitar(producto);
+    // 🔺 Aumenta visualmente el stock
+    const prodVisual = this.productosFiltrados.find(p => p.id === producto.id);
+    if (prodVisual) prodVisual.cantidad++;
   }
 
   eliminarItem(producto: Producto) {
+    const item = this.items.find(i => i.producto.id === producto.id);
+    const cantidadEnCanasta = item?.cantidad || 0;
     this.canastaService.eliminar(producto);
+    // 🔺 Aumenta stock visual según lo que había en la canasta
+    const prodVisual = this.productosFiltrados.find(p => p.id === producto.id);
+    if (prodVisual) prodVisual.cantidad += cantidadEnCanasta;
   }
 
   registrarVenta() {
@@ -193,6 +211,10 @@ export class VentasComponent implements OnInit {
         alert('Venta registrada con éxito');
         this.canastaService.vaciar();
         this.metodoPago = 0;
+        this.listarProductos();
+        this.clienteEncontrado = null;
+        this.dniCliente= '';
+
       },
       error: () => alert('Error al registrar la venta')
     });

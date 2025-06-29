@@ -1,5 +1,7 @@
 package com.example.jeaventa.controller;
 
+import com.example.jeaventa.dto.ProductoMasVendidoDTO;
+import com.example.jeaventa.dto.VentaPorMesDTO;
 import com.example.jeaventa.entity.Venta;
 import com.example.jeaventa.service.VentaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,5 +76,19 @@ public class VentaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/productos-mas-vendidos")
+    public ResponseEntity<List<ProductoMasVendidoDTO>> top10MasVendidos() {
+        return ResponseEntity.ok(ventaService.obtenerTop10ProductosVendidos());
+    }
+
+    @GetMapping("/ventas-por-mes")
+    public ResponseEntity<List<VentaPorMesDTO>> obtenerVentasPorMes() {
+        return ResponseEntity.ok(ventaService.obtenerVentasPorMes());
+    }
+
+    @GetMapping("/total-ventas")
+    public ResponseEntity<Double> obtenerTotalVentas() {
+        return ResponseEntity.ok(ventaService.obtenerTotalVentas());
+    }
 
 }

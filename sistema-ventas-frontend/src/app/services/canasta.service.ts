@@ -61,4 +61,10 @@ export class CanastaService {
     this.itemsSubject.next(this.items);
   }
 
+
+  obtenerCantidadPorProducto(productoId: number): number {
+    const item = this.items.find(i => i.producto.id === productoId);
+    return item ? item.cantidad : 0;
+  }
+
 }

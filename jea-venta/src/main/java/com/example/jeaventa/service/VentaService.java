@@ -1,5 +1,7 @@
 package com.example.jeaventa.service;
 
+import com.example.jeaventa.dto.ProductoMasVendidoDTO;
+import com.example.jeaventa.dto.VentaPorMesDTO;
 import com.example.jeaventa.entity.Venta;
 
 import java.time.LocalDateTime;
@@ -22,5 +24,12 @@ public interface VentaService {
     List<Venta> buscarPorSerie(String serie);
     List<Venta> buscarPorNumero(String numero);
     Optional<Venta> buscarPorSerieYNumero(String serie, String numero);
+
+    List<ProductoMasVendidoDTO> obtenerTop10ProductosVendidos();
+
+    public List<VentaPorMesDTO> obtenerVentasPorMes();
+
+    Double obtenerTotalVentas();
+
 
 }

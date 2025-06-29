@@ -2,11 +2,9 @@ package com.example.jeaauth.service.serviceImpl;
 
 import com.example.jeaauth.dto.AccesoDto;
 import com.example.jeaauth.dto.UsuarioDto;
+import com.example.jeaauth.dto.UsuarioRolDto;
 import com.example.jeaauth.entity.*;
-import com.example.jeaauth.repository.AccesoRolRepository;
-import com.example.jeaauth.repository.AuthUserRepository;
-import com.example.jeaauth.repository.UsuarioRepository;
-import com.example.jeaauth.repository.UsuarioRolRepository;
+import com.example.jeaauth.repository.*;
 import com.example.jeaauth.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +31,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Autowired
     private AccesoRolRepository accesoRolRepository;
 
+    @Autowired
+    private RolRepository rolRepository;
+
+
     @Override
     public Usuario save(UsuarioDto usuarioDto) {
         // Verifica si el username ya existe
@@ -57,12 +59,32 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setDni(usuarioDto.getDni());
         usuario.setDireccion(usuarioDto.getDireccion());
         usuario.setTelefono(usuarioDto.getTelefono());
-        usuario.setEstado(usuarioDto.getEstado());
+        usuario.setEstado(usuarioDto.getEstado() != null ? usuarioDto.getEstado() : true);
         usuario.setAuthUser(authUser); // Relación
 
         // Guardar Usuario
-        return usuarioRepository.save(usuario);
+        usuario = usuarioRepository.save(usuario);
+
+        // Si hay un rolId, asignar el rol al usuario
+        if (usuarioDto.getRolId() != null) {
+            Rol rol = rolRepository.findById(usuarioDto.getRolId())
+                    .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+            UsuarioRolPK pk = new UsuarioRolPK();
+            pk.setUsuarioId(usuario.getId());
+            pk.setRolId(rol.getIdRol());
+
+            UsuarioRol usuarioRol = new UsuarioRol();
+            usuarioRol.setId(pk);
+            usuarioRol.setUsuario(usuario);
+            usuarioRol.setRol(rol);
+
+            usuarioRolRepository.save(usuarioRol);
+        }
+
+        return usuario;
     }
+
 
     public List<AccesoDto> obtenerAccesosPorUsuario(Long usuarioId) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
@@ -85,7 +107,34 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         // Convertir a DTO
         return accesosSet.stream()
-                .map(a -> new AccesoDto(a.getNombre(), a.getUrl(), a.getIcono()))
+                .map(a -> new AccesoDto(a.getNombre(), a.getUrl(), a.getIcono(), a.getOrden()))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void asignarRol(UsuarioRolDto dto) {
+        Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Rol rol = rolRepository.findById(dto.getRolId())
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+        UsuarioRolPK pk = new UsuarioRolPK();
+        pk.setUsuarioId(usuario.getId());
+        pk.setRolId(rol.getIdRol());
+
+        UsuarioRol usuarioRol = new UsuarioRol();
+        usuarioRol.setId(pk);
+        usuarioRol.setUsuario(usuario);
+        usuarioRol.setRol(rol);
+
+        usuarioRolRepository.save(usuarioRol);
+    }
+
+    @Override
+    public List<Usuario> listarPorEstado(boolean estado) {
+        return usuarioRepository.findByEstado(estado);
+    }
+
+
 }

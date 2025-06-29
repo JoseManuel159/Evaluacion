@@ -14,6 +14,8 @@ public class UsuarioDto {
     private Boolean estado;
     private String userName;
     private String password;
+    private Long rolId; // 👉 ID del rol seleccionado al crear el usuario
+
 
     public UsuarioDto(Long id,String nombres, String apellidoPaterno, String apellidoMaterno, String dni, String direccion, String telefono, Boolean estado, String userName, String password) {
         this.id = id;
@@ -109,5 +111,13 @@ public class UsuarioDto {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public Long getRolId() {
+        return rolId;
+    }
+
+    public void setRolId(Long rolId) {
+        this.rolId = rolId;
     }
 }

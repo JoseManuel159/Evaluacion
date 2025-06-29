@@ -1,23 +1,28 @@
 package com.example.jeaventa.service.serviceImpl;
 
-import com.example.jeaventa.dto.Cliente;
-import com.example.jeaventa.dto.FormaPago;
-import com.example.jeaventa.dto.Producto;
+import com.example.jeaventa.dto.*;
 import com.example.jeaventa.entity.Venta;
 import com.example.jeaventa.entity.VentaDetalle;
 import com.example.jeaventa.feign.ClienteFeign;
 import com.example.jeaventa.feign.FormaPagoFeign;
 import com.example.jeaventa.feign.ProductoFeign;
+import com.example.jeaventa.repository.VentaDetalleRepository;
 import com.example.jeaventa.repository.VentaRepository;
 import com.example.jeaventa.service.VentaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -35,6 +40,29 @@ public class VentaServiceImpl implements VentaService {
 
     @Autowired
     private FormaPagoFeign formaPagoFeign;
+
+    @Autowired
+    private VentaDetalleRepository ventaDetalleRepository;
+
+    @Override
+    public List<ProductoMasVendidoDTO> obtenerTop10ProductosVendidos() {
+        Pageable top10 = PageRequest.of(0, 10);
+        List<Object[]> resultados = ventaDetalleRepository.obtenerTopProductosVendidos(top10);
+
+        List<ProductoMasVendidoDTO> lista = new ArrayList<>();
+
+        for (Object[] fila : resultados) {
+            Long productoId = (Long) fila[0];
+            Double cantidad = (Double) fila[1];
+
+            ResponseEntity<Producto> response = productoFeign.listarProducto(productoId);
+            String nombre = response.getBody() != null ? response.getBody().getNombre() : "Desconocido";
+
+            lista.add(new ProductoMasVendidoDTO(productoId, nombre, cantidad));
+        }
+
+        return lista;
+    }
 
 
     private Venta cargarVentaCompleta(Venta venta) {
@@ -185,6 +213,25 @@ public class VentaServiceImpl implements VentaService {
     public Optional<Venta> buscarPorSerieYNumero(String serie, String numero) {
         return ventaRepository.findBySerieAndNumero(serie, numero)
                 .map(this::cargarVentaCompleta);
+    }
+
+
+    public List<VentaPorMesDTO> obtenerVentasPorMes() {
+        List<Object[]> resultados = ventaRepository.ventasPorMes();
+
+        return resultados.stream().map(obj -> {
+            Integer mes = (Integer) obj[0];
+            Double total = (Double) obj[1];
+
+            String nombreMes = Month.of(mes).getDisplayName(TextStyle.FULL, new Locale("es", "ES"));
+
+            return new VentaPorMesDTO(nombreMes, total);
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public Double obtenerTotalVentas() {
+        return ventaRepository.obtenerTotalVentas() != null ? ventaRepository.obtenerTotalVentas() : 0.0;
     }
 
 
